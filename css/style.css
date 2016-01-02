@@ -78,8 +78,9 @@ header nav a:active {
     padding: 80px 0 0 300px;
 }
 #slideshow {
-    width: 600px;
+    width: 610px;
     height: 600px;
+    padding: 0 10px 0 0;
 }
 .cycle-slideshow {
     width: 100%;
@@ -89,6 +90,23 @@ header nav a:active {
     width: 100%;
     height: 100%;
     background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+#pager {
+    width: 100%;
+    padding: 10px 0 0 0;
+}
+#pager a {
+    float: left;
+    width: 20%;
+    padding-right: 10px;
+}
+#pager a div {
+    width: 100%;
+    height: 0;
+    padding-bottom: 100%;
+    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 }
