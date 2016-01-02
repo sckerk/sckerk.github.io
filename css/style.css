@@ -101,6 +101,7 @@ header nav a:active {
     float: left;
     width: 20%;
     padding-right: 10px;
+    padding-bottom: 10px;
 }
 #pager a div {
     width: 100%;
