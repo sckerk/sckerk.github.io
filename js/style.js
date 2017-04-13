@@ -1,5 +1,13 @@
+
+
 $(document).ready(function() {  
 	sizeitup();
+
+  $('#level-two').on("click", function(e){
+    $(this).next('div').toggle();
+    e.stopPropagation();
+    e.preventDefault();
+  });
 });
 $(window).resize(function() {
 	sizeitup();

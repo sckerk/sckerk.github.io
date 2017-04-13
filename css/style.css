@@ -1,9 +1,9 @@
 h1, h2, h3, h4, h5 ,h6 {
-    font-family: '', sans-serif;
+    font-family: 'Orbitron', sans-serif;
     font-weight: 300;
 }
 a, p {
-    font-family: '', sans-serif;
+    font-family: 'Oswald', sans-serif;
     font-weight: 400;
 }
 * {
@@ -39,14 +39,23 @@ html, body {
 
 header {
     position: absolute;
+    width: 100%;
     top: 0;
     left: 0;
-    width: 300px;
     padding: 10px;
+    z-index: 100;
 }
 header h1 {
     margin: 0;
     line-height: 80px;
+    font-size: 48px;
+}
+
+header h1 a {
+    text-decoration: none;
+    color: black;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 300;
 }
 header nav {
     padding: 0;
@@ -67,6 +76,10 @@ header nav a:hover {
 }
 header nav a:active {
     color: #aaa;
+}
+
+header .nav-item {
+    padding: 30px;
 }
 
 /**
@@ -110,4 +123,28 @@ header nav a:active {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+}
+
+.carousel-item img {
+    width: 100vw;
+    height: 100vh;
+}
+
+@media(max-width: 767px) {
+    .carousel-item img {
+        width: auto;
+        height: 100vh%
+    }
+}
+
+.carousel-item .caption {
+    position: fixed;
+    color: white;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    left: 0;
+    width: 200px;
+    bottom: 0;
+    background: #333;
 }
