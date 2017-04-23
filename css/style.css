@@ -2,7 +2,7 @@ h1, h2, h3, h4, h5 ,h6 {
     font-family: 'Orbitron', sans-serif;
     font-weight: 300;
 }
-a, p {
+a, p, li {
     font-family: 'Oswald', sans-serif;
     font-weight: 400;
 }
@@ -25,6 +25,7 @@ a, p {
         display: none;
     }
 }
+
 html {
     background-color: #fff;
 }
@@ -88,16 +89,19 @@ header .nav-item {
 
 #main {
     width: 900px;
-    padding: 80px 0 0 300px;
+    margin: 50px auto;
+    /*padding: 80px 0 0 300px;*/
 }
 #slideshow {
     width: 610px;
     height: 600px;
-    padding: 0 10px 0 0;
+    margin: 0 auto; 
+    /*padding: 0 10px 0 0;*/
 }
 .cycle-slideshow {
     width: 100%;
     height: 100%;
+    z-index: 10;
 }
 .slide {
     width: 100%;
@@ -130,13 +134,6 @@ header .nav-item {
     height: 100vh;
 }
 
-@media(max-width: 767px) {
-    .carousel-item img {
-        width: auto;
-        height: 100vh%
-    }
-}
-
 .carousel-item .caption {
     position: fixed;
     color: white;
@@ -147,4 +144,76 @@ header .nav-item {
     width: 200px;
     bottom: 0;
     background: #333;
+}
+
+.image-strip {
+    
+}
+
+.bio {
+    top: 150px;
+    max-width: 600px;
+}
+
+.bio h1,
+.bio h2,
+.bio h3 {
+    text-align: center;
+}
+
+.bio h2 {
+   margin-top: 90px;
+}
+
+.contact {
+    top: 150px;
+    text-align: center;
+}
+
+.contact a {
+    display: block;
+    color: black;
+    padding: 50px;
+}
+
+.events {
+    top: 150px;
+    text-align: center;
+}
+
+@media(max-width: 767px) {
+    .carousel-item img {
+        width: auto;
+        height: 100vh%
+    }
+    #pager {
+        margin: 0px 15px;
+    }
+    #main {
+        width: 400px;
+    }
+    header {
+        position: fixed;
+    }
+    .nav {
+        display: none;
+        text-align: center;
+        background: white;
+    }
+    header h1 {
+        font-size: 20px;
+        line-height: 40px;
+    }
+}
+
+#mobile-nav-button {
+    right: 20px;
+    top: 10px;
+    position: absolute;
+}
+
+.line {
+    width: 30px;
+    height: 10px;
+    border-bottom: solid 1px black;
 }
