@@ -1,0 +1,13 @@
+node_modules/
+_site/
+img/
+package-lock.json
+.github/
+.claude-surf-meta.json
+.claude-surf-status.json
+
+# Agent instruction file, edited by humans and tooling as prose rather than
+# maintained as source. Prettier's only complaint is emphasis markers
+# (*slim* -> _slim_), which is churn for zero benefit and a needless merge
+# conflict surface. README.md is NOT ignored and does pass --check.
+CLAUDE.md

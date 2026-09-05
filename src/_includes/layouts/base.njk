@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+        <meta name="viewport" content="width=device-width" />
+
+        <title>{{ title or site.title }}</title>
+        <meta name="description" content="{{ description or site.description }}" />
+        {%- for author in site.authors %}
+        <meta name="author" content="{{ author }}" />
+        {%- endfor %}
+
+        <link rel="shortcut icon" href="" />
+        <link rel="apple-touch-icon" href="" />
+
+        <meta name="theme-color" content="{{ site.themeColor }}" />
+
+        {# YEO-139 fills these in, together with the canonical link and the sitemap, all derived
+        from site.origin plus the page's own url. #}
+        <meta property="og:title" content="" />
+        <meta property="og:url" content="" />
+        <meta property="og:image" content="" />
+        <meta property="og:site_name" content="{{ site.title }}" />
+        <meta property="og:description" content="" />
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css?family=Orbitron|Oswald&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" type="text/css" href="/css/global.css" />
+        <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    </head>
+
+    <body>
+        <!-- Zero-height sentinel: js/header.js observes it so the header's .top
+         class can be toggled without a scroll listener. Must stay first. -->
+        <div id="top-sentinel" aria-hidden="true"></div>
+
+        <header class="top">
+            <h1><a href="/index.html">郭 秀 洙 Siew Chu Kerk</a></h1>
+            <button
+                type="button"
+                id="mobile-nav-button"
+                class="nav-toggle"
+                aria-expanded="false"
+                aria-controls="site-nav"
+            >
+                <span class="line"></span>
+                <span class="line"></span>
+                <span class="line"></span>
+            </button>
+            {% include "partials/nav.njk" %}
+        </header>
+
+        {{ content | safe }} {# The site has no footer today and adding one would fail this ticket's
+        visual-parity criterion. When there is one, it goes here. NOTE: keep angle brackets out of
+        Nunjucks comments - prettier's HTML printer parses tag names inside them as real markup. #}
+
+        <script src="/js/header.js" defer></script>
+        {%- for src in scripts %}
+        <script src="{{ src }}" defer></script>
+        {%- endfor %}
+    </body>
+</html>

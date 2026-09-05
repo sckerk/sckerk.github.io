@@ -1,0 +1,11 @@
+{# Route registry lives in src/_data/site.json. `nav: false` on the home entry is why it is absent
+here: home is reachable via the h1 link, exactly as it is today. NOTE: keep angle brackets out of
+these Nunjucks comments. Prettier's HTML printer parses tag names inside them as real markup and
+mangles the file. YEO-139: home canonicalises to origin + "/", not /index.html. YEO-140: emit
+aria-current="page" when p.key == key, and wrap these bare list items in a ul (they are invalid as
+direct nav children today; preserved as-is so this PR stays a pure port). #}
+<nav id="site-nav">
+    {%- for p in site.pages %}{% if p.nav %}
+    <li><a href="{{ p.url }}">{{ p.label }}</a></li>
+    {%- endif %}{% endfor %}
+</nav>

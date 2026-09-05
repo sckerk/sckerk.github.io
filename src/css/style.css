@@ -1,0 +1,470 @@
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: "Orbitron", sans-serif;
+    font-weight: 300;
+}
+a,
+p,
+li,
+dt,
+dd {
+    font-family: "Oswald", sans-serif;
+    font-weight: 400;
+}
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+.desktop {
+    display: none;
+}
+.mobile {
+    display: block;
+}
+@media (min-width: 767px) {
+    .desktop {
+        display: block;
+    }
+    .mobile {
+        display: none;
+    }
+}
+
+html {
+    background-color: #fff;
+}
+html,
+body {
+    width: 100%;
+    margin: 0;
+}
+
+/**
+ * 4.0 Header
+ */
+
+/* Zero-height anchor for js/header.js's IntersectionObserver. An empty
+   in-flow block with no margins contributes nothing to layout. */
+#top-sentinel {
+    height: 0;
+}
+
+header {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
+    padding: 10px;
+    z-index: 100;
+    display: flex; /* was: h1 float:left + nav BFC beside it */
+    align-items: flex-start;
+}
+header h1 {
+    margin: 0;
+    line-height: 80px;
+    font-size: 48px;
+    padding: 0 15px; /* was Bootstrap's .col-* base padding */
+    flex: 0 0 100%;
+}
+
+header h1 a {
+    text-decoration: none;
+    color: black;
+    font-family: "Orbitron", sans-serif;
+    font-weight: 300;
+}
+header nav {
+    /* Asymmetric on purpose - this is what the Bootstrap cascade actually
+       computed, measured with getComputedStyle on the pre-change pages.
+       This rule used to say `padding: 0`, but as an element selector (0,0,2)
+       it lost to both of the class selectors (0,1,0) below, whatever the
+       source order:
+         .col-1..12 base  {padding-left:15px; padding-right:15px}  byte 9713
+         .nav             {padding-left:0}                        byte 58596
+       Equal specificity, so `.nav` wins on source order and padding-left
+       resolved to 0, while `.col-*`'s padding-right:15px survived untouched.
+       Do not "tidy" this to `padding: 0 15px`: the nav is a flex item now,
+       and a left gutter pushes its min-content size past its flex basis, so
+       the box grows rightward and adds ~6px of horizontal scroll at exactly
+       768px that the old block-level nav never had.
+
+       `min-width: 0` is part of the same repair. A flex item defaults to
+       `min-width: auto`, which refuses to shrink below min-content; the old
+       nav was a block box with `max-width: 50%` that simply let its content
+       overflow. Without this the box is 1.1px wider than it used to be at
+       768px. Measured old vs new at 768/790/820/1440: identical. */
+    padding: 0 15px 0 0;
+    margin: 0;
+    min-width: 0;
+    display: flex; /* was Bootstrap .nav */
+    justify-content: flex-end; /* was Bootstrap .justify-content-end */
+    list-style: none;
+    flex: 0 0 100%;
+}
+@media (min-width: 768px) {
+    /* was Bootstrap's .col-md-6 breakpoint */
+    header h1,
+    header nav {
+        flex: 0 0 50%;
+    }
+    .nav-toggle {
+        /* was .hidden-md-up */
+        display: none;
+    }
+}
+header nav a,
+header nav a:link,
+header nav a:visited {
+    display: block;
+    text-decoration: none;
+    color: #555;
+    font-size: 14px;
+    -webkit-transition: color 0.3s;
+    -moz-transition: color 0.3s;
+    transition: color 0.3s;
+}
+header nav a:hover {
+    color: #111;
+}
+header nav a:active {
+    color: #aaa;
+}
+
+header nav a {
+    padding: 30px; /* folded in from the old `header .nav-item` */
+}
+
+/* The mobile toggle was a <div>; it is a <button> now, so the UA's button
+   chrome has to be neutralised, and its <span> bars re-blockified. */
+.nav-toggle {
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+}
+.nav-toggle .line {
+    display: block;
+}
+
+/**
+ * 5.0 Content
+ */
+
+#main {
+    width: 900px;
+    margin: 50px auto;
+    /*padding: 80px 0 0 300px;*/
+}
+#slideshow {
+    width: 610px;
+    height: 600px;
+    margin: 0 auto;
+    /*padding: 0 10px 0 0;*/
+}
+.cycle-slideshow {
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+}
+.slide {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+#pager {
+    width: 100%;
+    padding: 10px 0 0 0;
+}
+#pager a {
+    float: left;
+    width: 20%;
+    padding-right: 10px;
+    padding-bottom: 10px;
+}
+#pager a div {
+    width: 100%;
+    height: 0;
+    padding-bottom: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/**
+ * 5.1 Homepage carousel
+ *
+ * Was Bootstrap's JS carousel; it is CSS scroll-snap + js/carousel.js now.
+ * Every declaration below that replaces a Bootstrap one is copied verbatim
+ * from bootstrap 4.0.0-alpha.6, not approximated.
+ */
+
+.carousel {
+    position: relative;
+}
+.carousel-track {
+    /* was .carousel-inner */
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    /* Hide the scrollbar: on always-visible-scrollbar platforms it would
+       otherwise eat into the 100vh slide. */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.carousel-track::-webkit-scrollbar {
+    display: none;
+}
+.carousel-slide {
+    /* was .carousel-item */
+    position: relative;
+    flex: 0 0 100vw;
+    scroll-snap-align: start;
+}
+.carousel-slide img {
+    width: 100vw; /* verbatim from the old .carousel-item img */
+    height: 100vh;
+}
+.carousel .caption {
+    /* was position:fixed. All slides are now permanently in the DOM and
+       displayed, so three fixed captions would stack on top of each other.
+       The slide is 100vw x 100vh at the top of the page, so absolute
+       positioning inside it lands on the identical pixels. */
+    position: absolute;
+    display: none; /* was .d-none */
+    color: white;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    left: 0;
+    width: 200px;
+    bottom: 0;
+    background: #333;
+}
+@media (min-width: 768px) {
+    /* was .d-md-block */
+    .carousel .caption {
+        display: block;
+    }
+}
+
+.carousel-dots {
+    /* was .carousel-indicators */
+    position: absolute;
+    right: 0;
+    bottom: 10px;
+    left: 0;
+    z-index: 15;
+    display: flex;
+    justify-content: center;
+    padding-left: 0;
+    margin-right: 15%;
+    margin-left: 15%;
+    list-style: none;
+}
+.carousel-dots li {
+    position: relative;
+    flex: 1 0 auto;
+    max-width: 30px;
+    margin-right: 3px;
+    margin-left: 3px;
+}
+.carousel-dots a {
+    display: block;
+    height: 3px;
+    text-indent: -999px;
+    overflow: hidden;
+    text-decoration: none;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+.carousel-dots a[aria-current="true"] {
+    background-color: #fff; /* was .carousel-indicators .active */
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 15%;
+    color: #fff;
+    text-align: center;
+    opacity: 0.5;
+}
+.carousel-control-prev:focus,
+.carousel-control-prev:hover,
+.carousel-control-next:focus,
+.carousel-control-next:hover {
+    color: #fff;
+    text-decoration: none;
+    outline: 0;
+    opacity: 0.9;
+}
+.carousel-control-prev {
+    left: 0;
+}
+.carousel-control-next {
+    right: 0;
+}
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: transparent no-repeat center center;
+    background-size: 100% 100%;
+}
+.carousel-control-prev-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3E%3Cpath d='M4 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3E%3C/svg%3E");
+}
+.carousel-control-next-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 8 8'%3E%3Cpath d='M1.5 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3E%3C/svg%3E");
+}
+
+.visually-hidden {
+    /* was Bootstrap .sr-only, verbatim */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .carousel-track {
+        scroll-behavior: auto;
+    }
+}
+
+/**
+ * 5.2 Page wrapper and the bio definition list
+ */
+
+.page {
+    /* was Bootstrap .container-fluid, verbatim */
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.bio-list {
+    /* was .row + .col-12 .col-sm-4 / .col-sm-8 */
+    display: grid;
+    grid-template-columns: 33.333333% 66.666667%;
+    margin: 0 -15px; /* was Bootstrap .row's negative gutters */
+}
+.bio-list dt,
+.bio-list dd {
+    margin: 1em 0; /* the <p> margins these replace */
+    padding: 0 15px; /* was the .col-* base padding */
+}
+.bio-list dt {
+    text-align: center; /* was .text-center */
+    font-weight: 400;
+}
+.bio-list dd {
+    margin-left: 0;
+}
+@media (max-width: 575.98px) {
+    /* Bootstrap's sm breakpoint, unchanged */
+    .bio-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* YEO-137 replaces this with the real slideshow. */
+.gallery-stack img {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 0 0 10px;
+}
+
+.bio {
+    top: 150px;
+    max-width: 600px;
+}
+
+.bio h1,
+.bio h2,
+.bio h3 {
+    text-align: center;
+}
+
+.bio h2 {
+    margin-top: 90px;
+}
+
+.contact {
+    top: 150px;
+    text-align: center;
+}
+
+.contact a {
+    display: block;
+    color: black;
+    padding: 50px;
+}
+
+.events {
+    top: 150px;
+    text-align: center;
+}
+
+@media (max-width: 767px) {
+    .carousel-slide img {
+        width: auto;
+        height: 100vh%;
+    }
+    #pager {
+        margin: 0px 15px;
+    }
+    #main {
+        width: 400px;
+    }
+    header {
+        position: fixed;
+    }
+    /* Was `.nav` - the Bootstrap class this PR removes. Selector rewritten
+       so the mobile nav still collapses; declarations untouched. */
+    header nav {
+        display: none;
+        text-align: center;
+        background: white;
+    }
+    header h1 {
+        font-size: 20px;
+        line-height: 40px;
+    }
+}
+
+#mobile-nav-button {
+    right: 20px;
+    top: 10px;
+    position: absolute;
+}
+
+.line {
+    width: 30px;
+    height: 10px;
+    border-bottom: solid 1px black;
+}
