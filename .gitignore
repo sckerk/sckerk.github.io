@@ -2,4 +2,5 @@
 node_modules/
 _site/
 .claude-surf-meta.json
+.claude-surf-review.md
 .claude-surf-status.json
