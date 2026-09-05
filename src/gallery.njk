@@ -4,11 +4,12 @@ permalink: /gallery.html
 key: works
 ---
 
-<div id="main">
+<div class="gallery-page">
+    <h1 class="visually-hidden">Works</h1>
     {# Cycle2 went with jQuery. YEO-137 replaces this stack with the real slideshow; until then
     every work still renders and is indexable, which a stub would not be. Images are 1..33; 0.jpg is
-    the homepage hero and is deliberately not listed here. YEO-140 owns alt text - inventing
-    per-work titles is out of scope. #}
+    the homepage hero and is deliberately not listed here. YEO-137 owns the per-work alt text;
+    inventing per-work titles is out of scope. #}
     <div class="gallery-stack">
         {%- for n in range(1, 34) %}
         <img src="/img/{{ n }}.jpg" alt="" />

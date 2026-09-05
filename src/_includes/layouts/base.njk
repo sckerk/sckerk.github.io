@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
     <head>
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
@@ -9,10 +9,10 @@
         <meta name="description" content="{{ description or site.description }}" />
         {%- for author in site.authors %}
         <meta name="author" content="{{ author }}" />
-        {%- endfor %}
-
-        <link rel="shortcut icon" href="" />
-        <link rel="apple-touch-icon" href="" />
+        {%- endfor %} {# The two icon links that used to sit here carried href="", which is a W3C
+        validation error (href must be non-empty) and makes the browser re-request the page itself
+        as an icon. No icon asset exists in the repo, so they are removed rather than pointed at a
+        404; YEO-139 adds real ones along with the rest of the head metadata. #}
 
         <meta name="theme-color" content="{{ site.themeColor }}" />
 
@@ -35,12 +35,30 @@
     </head>
 
     <body>
+        {# The skip link is the first focusable thing in the document, ahead of the nav every page
+        repeats. It is hidden with clip-path, never display:none - display:none would take it out of
+        the focus order and there would be nothing to skip with. It is absolutely positioned in both
+        states, so it never displaces the sentinel below it. #}
+        <a class="skip-link" href="#main">Skip to content</a>
+
         <!-- Zero-height sentinel: js/header.js observes it so the header's .top
-         class can be toggled without a scroll listener. Must stay first. -->
+         class can be toggled without a scroll listener. Must stay first in flow. -->
         <div id="top-sentinel" aria-hidden="true"></div>
 
         <header class="top">
-            <h1><a href="/index.html">郭 秀 洙 Siew Chu Kerk</a></h1>
+            {# Exactly one h1 per page. On the homepage the site title is that h1; on every other
+            page the page's own heading is, and the title degrades to a paragraph carrying the same
+            .site-title styling, so the rendering is unchanged either way. Duplicated across the
+            branches on purpose - prettier parses this file as HTML and cannot cope with a Nunjucks
+            tag standing in for a tag name. #} {%- if key == "home" %}
+            <h1 class="site-title">
+                <a href="/index.html"><span lang="zh-Hant">郭 秀 洙</span> Siew Chu Kerk</a>
+            </h1>
+            {%- else %}
+            <p class="site-title">
+                <a href="/index.html"><span lang="zh-Hant">郭 秀 洙</span> Siew Chu Kerk</a>
+            </p>
+            {%- endif %}
             <button
                 type="button"
                 id="mobile-nav-button"
@@ -51,13 +69,18 @@
                 <span class="line"></span>
                 <span class="line"></span>
                 <span class="line"></span>
+                <span class="visually-hidden">Menu</span>
             </button>
             {% include "partials/nav.njk" %}
         </header>
 
-        {{ content | safe }} {# The site has no footer today and adding one would fail this ticket's
-        visual-parity criterion. When there is one, it goes here. NOTE: keep angle brackets out of
-        Nunjucks comments - prettier's HTML printer parses tag names inside them as real markup. #}
+        {# The main landmark and the skip link's target. tabindex="-1" so the skip link actually
+        moves focus here in browsers that will not focus a non-interactive element otherwise. #}
+        <main id="main" tabindex="-1">{{ content | safe }}</main>
+
+        <footer class="site-footer">
+            <p>© <span lang="zh-Hant">郭 秀 洙</span> Siew Chu Kerk</p>
+        </footer>
 
         <script src="/js/header.js" defer></script>
         {%- for src in scripts %}
