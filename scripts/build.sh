@@ -5,7 +5,7 @@
 # sckerk.github.io has no build step yet: the site is raw HTML served from
 # the repo root. GitHub Actions Pages deploys must upload a directory
 # artifact, so this script assembles one at _site/ that is byte-identical
-# to what master serves today.
+# to what main serves today.
 #
 # _site/ is Eleventy's default output directory, so the Eleventy ticket can
 # replace this script with `eleventy` and every workflow step - including
@@ -40,7 +40,7 @@ for dir in "${ASSET_DIRS[@]}"; do
 done
 
 # Copy every root HTML file, including the header.html fragment, so the
-# artifact serves exactly the same set of URLs master does today.
+# artifact serves exactly the same set of URLs main does today.
 shopt -s nullglob
 html_files=(*.html)
 shopt -u nullglob
