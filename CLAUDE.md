@@ -42,6 +42,28 @@ src/
 img/                          → passthrough-copied
 ```
 
+**The last line is superseded by YEO-137.** There is no `img/` in the tree
+any more:
+
+```
+originals/                    → the 34 master JPEGs, committed, NEVER served
+generated/img/                → WebP + JPEG derivatives, gitignored build
+                                output, passthrough-copied to /img
+scripts/resize-images.mjs     → sharp pipeline; `npm run build` is
+                                `resize-images && eleventy`
+src/_data/images.json         → generated manifest: width/height/widths plus
+                                hand-written alt for all 34, and the `sets`
+                                that assign masters to the home or works page
+src/_data/gallery.js          → turns that manifest into slide data
+src/js/gallery.js             → the gallery carousel's enhancement layer
+```
+
+`originals/` is kept off the public site solely by *not* being listed as a
+passthrough — don't add it, and don't widen the copy rules. `gallery.js`
+**throws, failing the build, if any image has empty or duplicated alt text or
+belongs to no set**. Alt text is written by a person looking at the work; it
+is never generated and never defaulted.
+
 Why it matters once it lands:
 
 - **The whole 2017 dependency stack is deleted**: Bootstrap

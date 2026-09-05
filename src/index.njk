@@ -3,47 +3,58 @@ layout: layouts/base.njk
 permalink: /index.html
 key: home
 scripts: ["/js/carousel.js"]
+# The captions live here rather than in src/_data/images.json: they label the strand of the practice
+# each slide stands for, not the photograph, so they are page copy and not image metadata. Front
+# matter also keeps them out of the template body, where Prettier's HTML printer reformats Nunjucks
+# tags it finds between attributes.
+captions: ["2-Dimensional", "3-Dimensional", "Digital"]
 ---
+
+{# The three hero slides are driven from src/_data/gallery.js exactly as the gallery is, so they get
+the same responsive derivatives and the same real alt text. The old alt values described the
+mechanism ("First slide"), not the art. #}
 
 <div class="carousel">
     <div class="carousel-track">
-        <div class="carousel-slide" id="slide-1">
-            <img
-                src="/img/0.jpg"
-                alt="A dense cluster of ruffled, crocheted coral-like forms in bright red, their frilled edges trimmed in yellow, turquoise, green and pink."
-            />
+        {%- for slide in gallery.home %}
+        <div class="carousel-slide" id="{{ slide.id }}">
+            <picture>
+                <source type="image/webp" srcset="{{ slide.srcsetWebp }}" sizes="100vw" />
+                <img
+                    src="{{ slide.src }}"
+                    srcset="{{ slide.srcsetJpeg }}"
+                    sizes="100vw"
+                    width="{{ slide.width }}"
+                    height="{{ slide.height }}"
+                    alt="{{ slide.alt }}"
+                    loading="{{ 'eager' if loop.first else 'lazy' }}"
+                    fetchpriority="{{ 'high' if loop.first else 'auto' }}"
+                    decoding="async"
+                />
+            </picture>
             <div class="caption">
-                <h2>2-Dimensional</h2>
+                <h2>{{ captions[loop.index0] }}</h2>
             </div>
         </div>
-        <div class="carousel-slide" id="slide-2">
-            <img
-                src="/img/1.jpg"
-                alt="A low, boat-shaped vessel with a rough rust-orange base and a rippling, cupped rim glazed in green and cream."
-            />
-            <div class="caption">
-                <h2>3-Dimensional</h2>
-            </div>
-        </div>
-        <div class="carousel-slide" id="slide-3">
-            <img
-                src="/img/2.jpg"
-                alt="A tall, rounded, dark mottled form rising from a wide craggy bowl, its surface flecked with rust, purple and brown."
-            />
-            <div class="caption">
-                <h2>Digital</h2>
-            </div>
-        </div>
+        {%- endfor %}
     </div>
     {# The dot anchors are intentionally empty: Bootstrap's indicators were empty list items, and
     any text here would change the page's body copy. aria-label gives them an accessible name
-    without adding text content. #}
+    without adding text content. aria-current is always present with an explicit true/false rather
+    than being conditionally emitted - "false" is valid ARIA for "not the current item", and a
+    Nunjucks if-tag sitting between attributes is what Prettier's HTML printer mangles. #}
     <ol class="carousel-dots">
-        <li><a href="#slide-1" aria-label="Slide 1" aria-current="true"></a></li>
-        <li><a href="#slide-2" aria-label="Slide 2"></a></li>
-        <li><a href="#slide-3" aria-label="Slide 3"></a></li>
+        {%- for slide in gallery.home %}
+        <li>
+            <a
+                href="#{{ slide.id }}"
+                aria-label="Slide {{ slide.position }}"
+                aria-current="{{ 'true' if loop.first else 'false' }}"
+            ></a>
+        </li>
+        {%- endfor %}
     </ol>
-    <a class="carousel-control-prev" href="#slide-3" role="button">
+    <a class="carousel-control-prev" href="#slide-{{ gallery.home | length }}" role="button">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="visually-hidden">Previous</span>
     </a>

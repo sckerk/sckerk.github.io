@@ -1,0 +1,280 @@
+{
+    "images": [
+        {
+            "file": "0.jpg",
+            "width": 1412,
+            "height": 794,
+            "widths": [200, 400, 800, 1200],
+            "alt": "A dense cluster of ruffled, crocheted coral-like forms in bright red, their frilled edges trimmed in yellow, turquoise, green and pink."
+        },
+        {
+            "file": "1.jpg",
+            "width": 623,
+            "height": 355,
+            "widths": [200, 400, 623],
+            "alt": "A low, boat-shaped vessel with a rough rust-orange base and a rippling, cupped rim glazed in green and cream."
+        },
+        {
+            "file": "2.jpg",
+            "width": 623,
+            "height": 355,
+            "widths": [200, 400, 623],
+            "alt": "A tall, rounded, dark mottled form rising from a wide craggy bowl, its surface flecked with rust, purple and brown."
+        },
+        {
+            "file": "3.jpg",
+            "width": 431,
+            "height": 326,
+            "widths": [200, 400, 431],
+            "alt": "A pale clay sculpture of jagged upright spires streaked with brown, rising from a smooth curved base on a workshop table."
+        },
+        {
+            "file": "4.jpg",
+            "width": 179,
+            "height": 326,
+            "widths": [179],
+            "alt": "A tall ridged form in mottled brown and cream, split by a long opening down one side."
+        },
+        {
+            "file": "5.jpg",
+            "width": 203,
+            "height": 355,
+            "widths": [200, 203],
+            "alt": "A pale yellow glazed sculpture with two pointed ear-like tips above a bulbous body, seated in a ring of open petal shapes."
+        },
+        {
+            "file": "6.jpg",
+            "width": 203,
+            "height": 355,
+            "widths": [200, 203],
+            "alt": "A green and pink glazed vessel topped with a flared trumpet-like opening, a dark hollow cut into its lower side."
+        },
+        {
+            "file": "7.jpg",
+            "width": 203,
+            "height": 355,
+            "widths": [200, 203],
+            "alt": "A tall rust-orange glazed jar crowned with a ragged collar of upturned petal shapes."
+        },
+        {
+            "file": "8.jpg",
+            "width": 623,
+            "height": 355,
+            "widths": [200, 400, 623],
+            "alt": "A smooth pale cream ovoid form trailing a long tapering green-mottled tail that curves away to the left."
+        },
+        {
+            "file": "9.jpg",
+            "width": 470,
+            "height": 354,
+            "widths": [200, 400, 470],
+            "alt": "An undulating orange crocheted form with deeply rippled frilled edges picked out in pink, green and blue."
+        },
+        {
+            "file": "10.jpg",
+            "width": 470,
+            "height": 354,
+            "widths": [200, 400, 470],
+            "alt": "A black crocheted form folded into regular deep waves, flecked here and there with purple, yellow and blue."
+        },
+        {
+            "file": "11.jpg",
+            "width": 469,
+            "height": 355,
+            "widths": [200, 400, 469],
+            "alt": "An upright open structure built from thin pale branching twigs, standing against a grey ground."
+        },
+        {
+            "file": "12.jpg",
+            "width": 469,
+            "height": 355,
+            "widths": [200, 400, 469],
+            "alt": "A long horizontal lattice of pale sticks lashed at the joints, enclosing a small skull at its left end."
+        },
+        {
+            "file": "13.jpg",
+            "width": 217,
+            "height": 354,
+            "widths": [200, 217],
+            "alt": "A standing assemblage of pale bones and branch-like limbs supporting a pink skull, photographed on a parquet floor."
+        },
+        {
+            "file": "14.jpg",
+            "width": 105,
+            "height": 354,
+            "widths": [105],
+            "alt": "A narrow vertical image of a receding row of pale yellow-green skulls fading into darkness."
+        },
+        {
+            "file": "15.jpg",
+            "width": 268,
+            "height": 355,
+            "widths": [200, 268],
+            "alt": "A painting of five standing figures showing skeletal, muscular and nervous-system layers against a dark red-brown ground."
+        },
+        {
+            "file": "16.jpg",
+            "width": 268,
+            "height": 355,
+            "widths": [200, 268],
+            "alt": "A painting of a radiating white burst held inside concentric rings, surrounded by swirling pink, red and grey."
+        },
+        {
+            "file": "17.jpg",
+            "width": 327,
+            "height": 248,
+            "widths": [200, 327],
+            "alt": "A soft-focus image of a pale dog lying on its side draped in cloth, in a dim interior."
+        },
+        {
+            "file": "18.jpg",
+            "width": 327,
+            "height": 248,
+            "widths": [200, 327],
+            "alt": "A dark blurred image of a black form standing over a small pale spill on a pink-grey surface."
+        },
+        {
+            "file": "19.jpg",
+            "width": 183,
+            "height": 355,
+            "widths": [183],
+            "alt": "A vertical painting of a jagged white and grey peak at the centre of a dark swirling purple vortex."
+        },
+        {
+            "file": "20.jpg",
+            "width": 182,
+            "height": 355,
+            "widths": [182],
+            "alt": "A vertical painting of turbulent red, black and white strokes gathered around a dark circular void."
+        },
+        {
+            "file": "21.jpg",
+            "width": 266,
+            "height": 355,
+            "widths": [200, 266],
+            "alt": "A painting of sweeping black brushstrokes driven across blocks of red, green and yellow."
+        },
+        {
+            "file": "22.jpg",
+            "width": 265,
+            "height": 355,
+            "widths": [200, 265],
+            "alt": "A painting of a dark scribbled mass hanging above a row of small pale squares on a washed grey ground."
+        },
+        {
+            "file": "23.jpg",
+            "width": 255,
+            "height": 355,
+            "widths": [200, 255],
+            "alt": "A drawing on graph paper: a dense knot of black gestural marks near the top, with a few isolated strokes far below."
+        },
+        {
+            "file": "24.jpg",
+            "width": 254,
+            "height": 355,
+            "widths": [200, 254],
+            "alt": "A drawing on graph paper of slashing black strokes laid over a scattered grid of filled grey and black squares."
+        },
+        {
+            "file": "25.jpg",
+            "width": 269,
+            "height": 355,
+            "widths": [200, 269],
+            "alt": "A pencil drawing of a recessed rectangular niche framing a tall column of tiny coloured squares."
+        },
+        {
+            "file": "26.jpg",
+            "width": 269,
+            "height": 355,
+            "widths": [200, 269],
+            "alt": "A drawing split down the middle: a dense field of small pale coloured squares on the left, fine grey hatching on the right."
+        },
+        {
+            "file": "27.jpg",
+            "width": 269,
+            "height": 355,
+            "widths": [200, 269],
+            "alt": "A pencil drawing of a dark arc sweeping over a pale field, crossed by a red-brown bar above three small triangles."
+        },
+        {
+            "file": "28.jpg",
+            "width": 269,
+            "height": 355,
+            "widths": [200, 269],
+            "alt": "A close view of a pencil drawing: grey hatching, a red horizontal line and faint ruled squares."
+        },
+        {
+            "file": "29.jpg",
+            "width": 241,
+            "height": 355,
+            "widths": [200, 241],
+            "alt": "A dark, heavily blurred image of a seated figure marked by two small points of red at the chest."
+        },
+        {
+            "file": "30.jpg",
+            "width": 247,
+            "height": 355,
+            "widths": [200, 247],
+            "alt": "A charcoal drawing of a reclining figure dissolving into dense dark scribbled strokes."
+        },
+        {
+            "file": "31.jpg",
+            "width": 355,
+            "height": 250,
+            "widths": [200, 355],
+            "alt": "A horizontal charcoal drawing of layered wavy strands filling the sheet like matted fibre."
+        },
+        {
+            "file": "32.jpg",
+            "width": 237,
+            "height": 355,
+            "widths": [200, 237],
+            "alt": "A charcoal drawing of a seated figure seen from behind, built up in dense dark strokes."
+        },
+        {
+            "file": "33.jpg",
+            "width": 245,
+            "height": 355,
+            "widths": [200, 245],
+            "alt": "A charcoal drawing of two dark rounded masses side by side, made from tangled scribbled lines."
+        }
+    ],
+    "sets": {
+        "home": ["0.jpg", "1.jpg", "2.jpg"],
+        "works": [
+            "1.jpg",
+            "2.jpg",
+            "3.jpg",
+            "4.jpg",
+            "5.jpg",
+            "6.jpg",
+            "7.jpg",
+            "8.jpg",
+            "9.jpg",
+            "10.jpg",
+            "11.jpg",
+            "12.jpg",
+            "13.jpg",
+            "14.jpg",
+            "15.jpg",
+            "16.jpg",
+            "17.jpg",
+            "18.jpg",
+            "19.jpg",
+            "20.jpg",
+            "21.jpg",
+            "22.jpg",
+            "23.jpg",
+            "24.jpg",
+            "25.jpg",
+            "26.jpg",
+            "27.jpg",
+            "28.jpg",
+            "29.jpg",
+            "30.jpg",
+            "31.jpg",
+            "32.jpg",
+            "33.jpg"
+        ]
+    }
+}

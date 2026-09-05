@@ -6,12 +6,14 @@
         "node": "^22.13.0 || ^24.0.0"
     },
     "scripts": {
-        "dev": "eleventy --serve",
-        "build": "eleventy",
+        "dev": "npm run resize-images && eleventy --serve",
+        "build": "npm run resize-images && eleventy",
+        "resize-images": "node scripts/resize-images.mjs",
         "lint": "prettier --check ."
     },
     "devDependencies": {
         "@11ty/eleventy": "3.1.6",
-        "prettier": "3.9.6"
+        "prettier": "3.9.6",
+        "sharp": "0.35.4"
     }
 }
