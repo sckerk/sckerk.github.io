@@ -64,7 +64,14 @@ header {
     display: flex; /* was: h1 float:left + nav BFC beside it */
     align-items: flex-start;
 }
-header h1 {
+/* The site title is an h1 on the homepage and a paragraph on every other page,
+   where the page's own heading is the h1 (YEO-140: exactly one h1 per page).
+   Selecting on the class keeps both renderings identical; the element rule this
+   replaced (`header h1`) would only have matched one of them. The p needs the
+   font stack that global.css's h1..h6 rule used to supply. */
+.site-title {
+    font-family: "Orbitron", sans-serif;
+    font-weight: 300;
     margin: 0;
     line-height: 80px;
     font-size: 48px;
@@ -72,7 +79,7 @@ header h1 {
     flex: 0 0 100%;
 }
 
-header h1 a {
+.site-title a {
     text-decoration: none;
     color: black;
     font-family: "Orbitron", sans-serif;
@@ -103,12 +110,11 @@ header nav {
     min-width: 0;
     display: flex; /* was Bootstrap .nav */
     justify-content: flex-end; /* was Bootstrap .justify-content-end */
-    list-style: none;
     flex: 0 0 100%;
 }
 @media (min-width: 768px) {
     /* was Bootstrap's .col-md-6 breakpoint */
-    header h1,
+    .site-title,
     header nav {
         flex: 0 0 50%;
     }
@@ -116,6 +122,17 @@ header nav {
         /* was .hidden-md-up */
         display: none;
     }
+}
+/* The nav's items are in a ul now (they were bare li children of nav, which is
+   invalid). The ul is the single flex item inside nav and carries the row
+   itself, so the geometry nav used to produce is unchanged: the UA's ul margin
+   and 40px padding-left are zeroed, and flex-end still packs the items right. */
+header nav ul {
+    display: flex;
+    justify-content: flex-end;
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 header nav a,
 header nav a:link,
@@ -132,7 +149,10 @@ header nav a:hover {
     color: #111;
 }
 header nav a:active {
-    color: #aaa;
+    /* was #aaa, roughly 2.3:1 on white and a WCAG AA failure. #767676 is the
+       lightest grey that still clears 4.5:1, so the "lightens while pressed"
+       feedback survives. */
+    color: #767676;
 }
 
 header nav a {
@@ -158,10 +178,14 @@ header nav a {
  * 5.0 Content
  */
 
-#main {
+/* Was #main. The id moved to the layout's main landmark, which wraps every
+   page, so these gallery-only metrics had to stop being keyed to it.
+   max-width caps the fixed width instead of overflowing narrow viewports
+   (WCAG 1.4.10 reflow); the responsive work itself is YEO-138's. */
+.gallery-page {
     width: 900px;
+    max-width: 100%;
     margin: 50px auto;
-    /*padding: 80px 0 0 300px;*/
 }
 #slideshow {
     width: 610px;
@@ -228,11 +252,16 @@ header nav a {
 .carousel-slide {
     /* was .carousel-item */
     position: relative;
-    flex: 0 0 100vw;
+    /* was 100vw: the page now has a footer under the 100vh carousel, so it
+       scrolls vertically, and on platforms with classic scrollbars 100vw is
+       wider than the track by the scrollbar's width - enough to push the right
+       edge of every slide out of view. 100% of the track is the same number of
+       pixels whenever no scrollbar is present. */
+    flex: 0 0 100%;
     scroll-snap-align: start;
 }
 .carousel-slide img {
-    width: 100vw; /* verbatim from the old .carousel-item img */
+    width: 100%; /* was 100vw; see .carousel-slide */
     height: 100vh;
 }
 .carousel .caption {
@@ -250,6 +279,13 @@ header nav a {
     width: 200px;
     bottom: 0;
     background: #333;
+}
+.carousel .caption h2 {
+    /* These were h4s, which skipped from the page's h1 straight to h4. The
+       level is corrected; the h4 metrics are pinned here so the caption renders
+       at exactly the size it did before. */
+    font-size: 1em;
+    margin: 1.33em 0;
 }
 @media (min-width: 768px) {
     /* was .d-md-block */
@@ -311,7 +347,13 @@ header nav a {
 .carousel-control-next:hover {
     color: #fff;
     text-decoration: none;
-    outline: 0;
+    /* Bootstrap's `outline: 0` used to sit here. It is dropped, not moved: at
+       (0,2,0) it outranked the :focus-visible rule in 6.0 at (0,1,1), so these
+       two controls - the ones that sit over unpredictable artwork, where the
+       two-tone ring matters most - kept the halo and lost the dark outline.
+       Bootstrap suppressed the ring because :focus fired on mouse clicks too;
+       :focus-visible makes that distinction itself, so nothing needs
+       suppressing now. */
     opacity: 0.9;
 }
 .carousel-control-prev {
@@ -350,6 +392,13 @@ header nav a {
 @media (prefers-reduced-motion: reduce) {
     .carousel-track {
         scroll-behavior: auto;
+    }
+    /* Harmless on its own, but a reduced-motion preference should not leave
+       stragglers behind: js/carousel.js already stops the auto-advance. */
+    header nav a {
+        -webkit-transition: none;
+        -moz-transition: none;
+        transition: none;
     }
 }
 
@@ -438,7 +487,7 @@ header nav a {
     #pager {
         margin: 0px 15px;
     }
-    #main {
+    .gallery-page {
         width: 400px;
     }
     header {
@@ -451,7 +500,7 @@ header nav a {
         text-align: center;
         background: white;
     }
-    header h1 {
+    .site-title {
         font-size: 20px;
         line-height: 40px;
     }
@@ -467,4 +516,66 @@ header nav a {
     width: 30px;
     height: 10px;
     border-bottom: solid 1px black;
+}
+
+/**
+ * 6.0 Accessibility affordances (YEO-140)
+ */
+
+/* Hidden until focused, and hidden with clip-path rather than display:none -
+   display:none would drop it out of the focus order, which is the single most
+   common way a skip link ships broken. Absolutely positioned in both states so
+   it never displaces #top-sentinel or the header. */
+.skip-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 200;
+    padding: 12px 20px;
+    background: #fff;
+    color: #111;
+    font-family: "Oswald", sans-serif;
+    font-size: 14px;
+    text-decoration: underline;
+    clip-path: inset(50%);
+}
+.skip-link:focus {
+    clip-path: none;
+}
+
+/* One visible focus indicator for everything that can hold focus. Two-tone on
+   purpose: the header sits over the homepage carousel, so a single dark ring
+   can land on dark artwork. The white halo runs 0-6px out from the border box
+   and the 2px dark ring is painted over its 2-4px band, so one of the two is
+   always at 3:1 or better against whatever is behind it.
+   #main is excluded (tabindex="-1", focused only as the skip link's target);
+   no rule anywhere sets outline: none without a replacement. */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+    outline: 2px solid #111;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px #fff;
+}
+
+.site-footer {
+    padding: 40px 15px;
+    text-align: center;
+}
+.site-footer p {
+    margin: 0;
+    color: #555; /* 7.4:1 on white */
+    font-size: 14px;
+}
+
+/* Was an h3 directly under the page h1, which skipped a level. It is a
+   descriptive line rather than a section heading, so it is a paragraph now,
+   pinned to the h3 metrics it used to render at. */
+.bio .lede {
+    font-family: "Orbitron", sans-serif;
+    font-weight: 300;
+    font-size: 1.17em;
+    line-height: 1.1;
+    margin: 1em 0;
+    text-align: center;
 }

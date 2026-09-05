@@ -104,6 +104,12 @@ textarea {
 [hidden] {
     display: none;
 }
+/* normalize v1.1.3 predates the element, and the stylesheet it replaced never
+   had to declare it. Modern browsers all default main to block; this is the
+   belt-and-braces line so the new landmark cannot render inline anywhere. */
+main {
+    display: block;
+}
 
 /**
  * 2.0 Clearings and Grid
