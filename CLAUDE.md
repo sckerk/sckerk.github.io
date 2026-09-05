@@ -140,9 +140,9 @@ Why it matters once it lands:
 ## Linear workspace — read this before filing anything
 
 Two Linear MCP servers are configured on this machine and they point at
-different workspaces. `mcp__linear__*` is **Pseudo Sleep Machine** (team
-`PSE`) — wrong for this repo. `mcp__linear-yeowiki__*` is **Yeo Wiki**
-(team `YEO`) — the right one. The bare `linear` name reads like the
+different workspaces. `mcp__linear__*` points at an unrelated workspace —
+wrong for this repo. `mcp__linear-yeowiki__*` is **Yeo Wiki** (team
+`YEO`) — the right one. The bare `linear` name reads like the
 default, which is exactly the trap. Creating a ticket in the wrong
 workspace does not error; it just quietly succeeds somewhere else. After
 creating or fetching a ticket, confirm the returned URL starts with
