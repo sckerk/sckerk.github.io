@@ -110,7 +110,6 @@ header nav {
     min-width: 0;
     display: flex; /* was Bootstrap .nav */
     justify-content: flex-end; /* was Bootstrap .justify-content-end */
-    list-style: none;
     flex: 0 0 100%;
 }
 @media (min-width: 768px) {
@@ -348,7 +347,13 @@ header nav a {
 .carousel-control-next:hover {
     color: #fff;
     text-decoration: none;
-    outline: 0;
+    /* Bootstrap's `outline: 0` used to sit here. It is dropped, not moved: at
+       (0,2,0) it outranked the :focus-visible rule in 6.0 at (0,1,1), so these
+       two controls - the ones that sit over unpredictable artwork, where the
+       two-tone ring matters most - kept the halo and lost the dark outline.
+       Bootstrap suppressed the ring because :focus fired on mouse clicks too;
+       :focus-visible makes that distinction itself, so nothing needs
+       suppressing now. */
     opacity: 0.9;
 }
 .carousel-control-prev {
