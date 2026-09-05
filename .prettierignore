@@ -1,0 +1,7 @@
+node_modules/
+_site/
+img/
+package-lock.json
+.github/
+.claude-surf-meta.json
+.claude-surf-status.json

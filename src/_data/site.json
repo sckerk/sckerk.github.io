@@ -1,0 +1,20 @@
+{
+    "title": "Siew Chu Kerk",
+    "description": "",
+    "origin": "https://sckerk.com",
+    "authors": ["Max Yeo", "Alyssa Yeo"],
+    "themeColor": "#FFF",
+    "pages": [
+        { "key": "home", "url": "/index.html", "label": "Home", "nav": false, "sitemap": true },
+        { "key": "works", "url": "/gallery.html", "label": "Works", "nav": true, "sitemap": true },
+        { "key": "events", "url": "/events.html", "label": "Events", "nav": true, "sitemap": true },
+        { "key": "bio", "url": "/bio.html", "label": "Bio", "nav": true, "sitemap": true },
+        {
+            "key": "contact",
+            "url": "/contact.html",
+            "label": "Contact",
+            "nav": true,
+            "sitemap": true
+        }
+    ]
+}

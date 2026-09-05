@@ -1,0 +1,45 @@
+---
+layout: layouts/base.njk
+permalink: /index.html
+key: home
+scripts: ["/js/carousel.js"]
+---
+
+<div class="carousel">
+    <div class="carousel-track">
+        <div class="carousel-slide" id="slide-1">
+            <img src="/img/0.jpg" alt="First slide" />
+            <div class="caption">
+                <h4>2-Dimensional</h4>
+            </div>
+        </div>
+        <div class="carousel-slide" id="slide-2">
+            <img src="/img/1.jpg" alt="Second slide" />
+            <div class="caption">
+                <h4>3-Dimensional</h4>
+            </div>
+        </div>
+        <div class="carousel-slide" id="slide-3">
+            <img src="/img/2.jpg" alt="Third slide" />
+            <div class="caption">
+                <h4>Digital</h4>
+            </div>
+        </div>
+    </div>
+    {# The dot anchors are intentionally empty: Bootstrap's indicators were empty list items, and
+    any text here would change the page's body copy. aria-label gives them an accessible name
+    without adding text content. #}
+    <ol class="carousel-dots">
+        <li><a href="#slide-1" aria-label="Slide 1" aria-current="true"></a></li>
+        <li><a href="#slide-2" aria-label="Slide 2"></a></li>
+        <li><a href="#slide-3" aria-label="Slide 3"></a></li>
+    </ol>
+    <a class="carousel-control-prev" href="#slide-3" role="button">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#slide-2" role="button">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </a>
+</div>
