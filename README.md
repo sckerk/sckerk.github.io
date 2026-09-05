@@ -13,15 +13,13 @@ a bio (statement, education, exhibitions, publications), and contact
 
 ## Current state
 
-The site is raw HTML/CSS/JS served from the repo root — no build step, no
-framework. An Eleventy rewrite (static site generator, Nunjucks templates)
-is in progress on a feature branch; once it merges this section and the
-commands below will change. See `CLAUDE.md` for what's landing.
+The site is built with [Eleventy](https://www.11ty.dev/) and Nunjucks
+templates under `src/`. No client framework, no bundler; the only shipped
+JavaScript is three small vanilla files under `src/js/`.
 
 ## Requirements
 
 - Node, version pinned in `.nvmrc` (`nvm use`)
-- Python 3 (used only for the local dev server)
 
 ## Run locally
 
@@ -29,8 +27,8 @@ commands below will change. See `CLAUDE.md` for what's landing.
 npm run dev
 ```
 
-Serves the repo root as raw HTML at http://localhost:8080. No build, no
-live reload.
+Generates any missing image derivatives, then serves the built site with
+live reload at http://localhost:8080.
 
 ## Build
 
@@ -38,14 +36,53 @@ live reload.
 npm run build
 ```
 
-Runs `scripts/build.sh`, which stages a deployable copy of the site at
-`_site/` (HTML files plus `css/`, `fonts/`, `img/`, `js/`). This is a
-temporary shim needed only because GitHub Actions Pages deploys require a
-directory artifact — it goes away once Eleventy lands and produces
-`_site/` itself.
+Two steps: `npm run resize-images` regenerates `generated/img/` from the
+masters in `originals/`, then Eleventy renders `src/` into `_site/`. That
+is exactly what CI runs, so a green local build is a real predictor.
 
-There is no lint step worth running yet: `npm run lint` is a placeholder
-that always passes.
+```
+npm run lint
+```
+
+`prettier --check .` over the whole repo.
+
+## Images
+
+The 34 master photographs live in `originals/` and are committed. They are
+**never served** — nothing copies them into `_site/`. What ships is the
+derivatives in `generated/img/`, which are build output and are _not_
+committed (`generated/` is gitignored).
+
+```
+npm run resize-images                # generate whatever is missing or stale
+npm run resize-images -- --force     # regenerate everything
+npm run resize-images -- --dry-run   # report only, write nothing
+npm run resize-images -- --help
+```
+
+Each master gets WebP and JPEG derivatives at 200/400/800/1200 px, clamped
+so nothing is ever upscaled past the master's own width. Most of these
+photographs are small — the widest gallery work is 623 px — so on many
+images only the 200 px rung plus the master's own width survive.
+
+`src/_data/images.json` is the manifest. The script rewrites the measured
+fields (`width`, `height`, `widths`) on every run and **preserves the
+hand-written `alt` text**, so regenerating is always safe. `sets` is
+hand-maintained and decides which masters are homepage hero slides and
+which are gallery works.
+
+### Adding or replacing a work
+
+1. Drop the photograph into `originals/`, or overwrite an existing one.
+2. Run `npm run resize-images`.
+3. Write the `alt` text for the entry in `src/_data/images.json`.
+4. Add the filename to the right list under `sets`.
+
+Steps 3 and 4 are enforced, not suggested: the build **fails** if any image
+has empty or duplicated alt text, or belongs to no set. Alt text is the only
+description these works have — there are no titles, dates or media on
+record — so it is written by a person looking at the image, never generated
+and never defaulted to a placeholder.
 
 ## Deploy
 

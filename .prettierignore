@@ -1,6 +1,7 @@
 node_modules/
 _site/
-img/
+originals/
+generated/
 package-lock.json
 .github/
 .claude-surf-meta.json

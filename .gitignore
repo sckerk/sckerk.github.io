@@ -1,6 +1,7 @@
 .DS_Store
 node_modules/
 _site/
+generated/
 .claude-surf-meta.json
 .claude-surf-review.md
 .claude-surf-status.json

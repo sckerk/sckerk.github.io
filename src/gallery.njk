@@ -2,17 +2,89 @@
 layout: layouts/base.njk
 permalink: /gallery.html
 key: works
+scripts: ["/js/gallery.js"]
 ---
+
+{# Every one of the 33 works is a real img element in the served HTML - not injected, not
+virtualised, not deferred behind a click. That is the point of YEO-137: the Cycle2 markup this
+replaces was 33 empty divs carrying CSS background-image, so a crawler found no image, no alt and no
+filename anywhere on the page. loading="lazy" is what makes shipping all 33 free - they cost nothing
+until scrolled to. Every path comes from src/_data/gallery.js, so none is hand-typed. The
+.gallery-page wrapper and the visually-hidden h1 are YEO-140's and are kept as they are: the page
+needs exactly one h1, and the id="main" this element used to carry now belongs to the layout's main
+landmark. #}
 
 <div class="gallery-page">
     <h1 class="visually-hidden">Works</h1>
-    {# Cycle2 went with jQuery. YEO-137 replaces this stack with the real slideshow; until then
-    every work still renders and is indexable, which a stub would not be. Images are 1..33; 0.jpg is
-    the homepage hero and is deliberately not listed here. YEO-137 owns the per-work alt text;
-    inventing per-work titles is out of scope. #}
-    <div class="gallery-stack">
-        {%- for n in range(1, 34) %}
-        <img src="/img/{{ n }}.jpg" alt="" />
-        {%- endfor %}
+    <div
+        id="slideshow"
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="Works"
+        tabindex="0"
+    >
+        {# role="list" is redundant in theory, but list-style:none drops the implicit list role in
+        Safari/VoiceOver, and this list is how the number of works gets announced. #}
+        <ul class="slides" role="list">
+            {%- for work in gallery.works %}
+            <li
+                class="slide"
+                id="{{ work.id }}"
+                role="group"
+                aria-roledescription="slide"
+                aria-label="Work {{ work.position }} of {{ gallery.works | length }}"
+            >
+                <picture>
+                    <source type="image/webp" srcset="{{ work.srcsetWebp }}" sizes="610px" />
+                    <img
+                        src="{{ work.src }}"
+                        srcset="{{ work.srcsetJpeg }}"
+                        sizes="610px"
+                        width="{{ work.width }}"
+                        height="{{ work.height }}"
+                        alt="{{ work.alt }}"
+                        loading="{{ 'eager' if loop.first else 'lazy' }}"
+                        fetchpriority="{{ 'high' if loop.first else 'auto' }}"
+                        decoding="async"
+                    />
+                </picture>
+            </li>
+            {%- endfor %}
+        </ul>
     </div>
+
+    {# The two sizes values above and below are the real layout boxes, not guesses: #slideshow is
+    pinned to 610px at every viewport, and a pager cell is 20% of the 900px .gallery-page less its
+    10px gutter (170px), or 20% of 400px less the same gutter on mobile (70px). YEO-138 makes those
+    boxes fluid and must revisit both. The pager is plain anchors to each slide's fragment. With
+    scroll-behavior:smooth on the scroller the browser brings the slide into view natively, so the
+    pager works fully with JavaScript disabled - which the Cycle2 pager did not. js/gallery.js only
+    adds the active highlight and arrow keys on top. The thumbnails are alt="" deliberately. They
+    are the same 33 works already described above, and repeating each description would make a
+    screen reader announce every work twice; the link's own aria-label names it instead. They are
+    still real img elements, so no CSS background-image pointing at /img/ survives anywhere in the
+    output. #}
+    <nav id="pager" aria-label="Choose a work">
+        {%- for work in gallery.works %}
+        <a href="#{{ work.id }}" aria-label="Work {{ work.position }}">
+            <picture>
+                <source
+                    type="image/webp"
+                    srcset="{{ work.srcsetWebp }}"
+                    sizes="(max-width: 767px) 70px, 170px"
+                />
+                <img
+                    src="{{ work.src }}"
+                    srcset="{{ work.srcsetJpeg }}"
+                    sizes="(max-width: 767px) 70px, 170px"
+                    width="{{ work.width }}"
+                    height="{{ work.height }}"
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                />
+            </picture>
+        </a>
+        {%- endfor %}
+    </nav>
 </div>

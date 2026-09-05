@@ -4,11 +4,22 @@ module.exports = function (eleventyConfig) {
     eleventyConfig.addPassthroughCopy("src/css");
     eleventyConfig.addPassthroughCopy("src/js");
 
-    // img/ stays at the repo root on purpose: 34 binaries, and moving them
-    // would bury this PR's real diff under 34 renames for zero benefit.
-    // Object form gives an explicit output path rather than relying on
-    // input-dir stripping for a path that is outside the input dir.
-    eleventyConfig.addPassthroughCopy({ img: "img" });
+    // What ships as /img is *generated*, never committed: scripts/resize-images.mjs
+    // reads the masters in originals/ and writes WebP + JPEG derivatives into
+    // generated/img/ (gitignored), which `npm run build` does before Eleventy
+    // runs. See the "Images" section of README.md.
+    //
+    // originals/ is deliberately NOT a passthrough. It is the untouched source
+    // of truth, kept so encoder settings can be revisited without re-scanning
+    // anything, and the only thing keeping ~1.2 MB of unoptimised JPEG off the
+    // public site is its absence from this list. Do not add it, and do not
+    // replace these with a broader copy rule that would sweep it in.
+    eleventyConfig.addPassthroughCopy({ "generated/img": "img" });
+
+    // src/_data/gallery.js reads images.json itself rather than letting Eleventy
+    // load it, so Eleventy does not know it is a dependency. Without this, an
+    // alt-text edit under `--serve` would not rebuild anything.
+    eleventyConfig.addWatchTarget("./src/_data/images.json");
 
     // GitHub Pages runs Jekyll over the artifact by default and drops
     // underscore-prefixed paths. Eleventy 3.1.6's passthrough sets
