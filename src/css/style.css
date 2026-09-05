@@ -79,12 +79,28 @@ header h1 a {
     font-weight: 300;
 }
 header nav {
-    /* This rule used to say `padding: 0`, but it never took effect: Bootstrap's
-       `.col-*` base padding is a class selector (0,1,0) and outranked this
-       element selector (0,0,2) regardless of source order, so the nav actually
-       rendered with 15px side gutters. Pinned to what shipped. */
-    padding: 0 15px;
+    /* Asymmetric on purpose - this is what the Bootstrap cascade actually
+       computed, measured with getComputedStyle on the pre-change pages.
+       This rule used to say `padding: 0`, but as an element selector (0,0,2)
+       it lost to both of the class selectors (0,1,0) below, whatever the
+       source order:
+         .col-1..12 base  {padding-left:15px; padding-right:15px}  byte 9713
+         .nav             {padding-left:0}                        byte 58596
+       Equal specificity, so `.nav` wins on source order and padding-left
+       resolved to 0, while `.col-*`'s padding-right:15px survived untouched.
+       Do not "tidy" this to `padding: 0 15px`: the nav is a flex item now,
+       and a left gutter pushes its min-content size past its flex basis, so
+       the box grows rightward and adds ~6px of horizontal scroll at exactly
+       768px that the old block-level nav never had.
+
+       `min-width: 0` is part of the same repair. A flex item defaults to
+       `min-width: auto`, which refuses to shrink below min-content; the old
+       nav was a block box with `max-width: 50%` that simply let its content
+       overflow. Without this the box is 1.1px wider than it used to be at
+       768px. Measured old vs new at 768/790/820/1440: identical. */
+    padding: 0 15px 0 0;
     margin: 0;
+    min-width: 0;
     display: flex; /* was Bootstrap .nav */
     justify-content: flex-end; /* was Bootstrap .justify-content-end */
     list-style: none;

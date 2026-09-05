@@ -54,7 +54,13 @@
         var observer = new IntersectionObserver(
             function (entries) {
                 entries.forEach(function (entry) {
-                    if (entry.isIntersecting) setCurrent(slides.indexOf(entry.target));
+                    // isIntersecting is true for any ratio above zero, so the
+                    // outgoing slide also fires as it crosses 0.6 downward.
+                    // Test the ratio too, or that callback would briefly set
+                    // `current` back to the slide we are scrolling away from.
+                    if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+                        setCurrent(slides.indexOf(entry.target));
+                    }
                 });
             },
             { root: track, threshold: 0.6 },
