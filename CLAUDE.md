@@ -10,8 +10,11 @@ Six raw HTML files at the repo root (`index.html`, `gallery.html`,
 `header.html` and `gallery1.html` — that exist only to be deleted), a
 `css/` directory, a `js/` directory carrying jQuery 1.11.2 and jQuery
 Cycle2, an `img/` directory of 34 photos, and a `fonts/` directory of
-FontAwesome webfonts that **no stylesheet references** (dead weight,
-~800 KB). There is no build step today: `scripts/build.sh` just copies an
+FontAwesome webfonts. `css/global.css` does `@font-face` them in, but
+**no HTML on the site ever uses a FontAwesome icon class**, so they're
+declared but never rendered — dead weight, ~800 KB. `fonts/` is reachable
+only from CSS, never from HTML. There is no build step today:
+`scripts/build.sh` just copies an
 allowlist of files into `_site/` so the Actions-based Pages deploy has a
 directory artifact to upload. Search traffic is a stated audience for this
 site — that's why indexability shows up repeatedly in the ticket list
@@ -171,11 +174,12 @@ EDGE CASES & CONSIDERATIONS, OUT OF SCOPE, DEPENDENCIES, CODEBASE NOTES.
 
 ### Git and PR conventions
 
-- Commit subject: `YEO-<n> Short description` — ticket ID, space,
-  imperative summary, ~50 chars, blank line, then a body explaining *what*
-  and *why* (not *how*), wrapped at 72 characters. `f7ea548` is the
-  reference example. This repo's history carries no AI-attribution
-  trailers.
+- Commit subject: `YEO-<n> Short description` — ticket ID, space, short
+  imperative summary, blank line, then a body explaining *what* and *why*
+  (not *how*), hard-wrapped rather than left as one long line. `f7ea548`
+  is the reference example (72-character subject excluding GitHub's
+  auto-appended `(#6)`; body wrapped at roughly 74–77 columns). This
+  repo's history carries no AI-attribution trailers.
 - Branch names: `YEO-<n>-<kebab-slug>`, e.g.
   `YEO-135-admin-add-node-toolchain-github-actions-cicd-and-grouped-dependabot`.
 - PR title: `YEO-<n>: <full Linear ticket title>`, e.g.

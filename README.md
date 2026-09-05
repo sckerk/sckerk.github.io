@@ -51,8 +51,11 @@ that always passes.
 
 Deployment is automatic. Every push to `main` runs
 `.github/workflows/deploy-pages.yml`, which builds the site and publishes
-`_site/` to GitHub Pages via the Actions deployment flow. There is no
-manual deploy step and no `CNAME` file in this repo — the custom domain
+`_site/` to GitHub Pages via the Actions deployment flow. The workflow
+also has a `workflow_dispatch` trigger, so a manual run is available from
+Actions → "Deploy to GitHub Pages" → Run workflow on `main` — use this
+when you need to redeploy without a new commit, e.g. after changing Pages
+settings. There is no `CNAME` file in this repo — the custom domain
 (`sckerk.com`) is configured in the repo's Pages settings, not in source.
 
 Every pull request into `main` runs
