@@ -1,0 +1,13 @@
+{
+  "name": "sckerk.github.io",
+  "private": true,
+  "version": "0.0.0",
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0"
+  },
+  "scripts": {
+    "dev": "echo 'dev: serving the repo root at http://localhost:8080 - raw HTML, no build step yet' && python3 -m http.server 8080",
+    "build": "bash scripts/build.sh",
+    "lint": "echo 'lint: PLACEHOLDER - no linter is installed yet. The Eleventy migration replaces this. Exiting 0 so CI can be wired up before there is anything to lint.'"
+  }
+}

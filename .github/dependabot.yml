@@ -1,0 +1,60 @@
+version: 2
+updates:
+  # package.json and package-lock.json live at the repo root - this site is
+  # not nested in a subdirectory.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    # There are zero dependencies today; the Eleventy migration adds the
+    # first real ones. This entry is configured now so that grouping is
+    # already correct on the day they land, rather than arriving as a
+    # separate follow-up. Until then Dependabot simply finds nothing to
+    # update here, which is expected and not a misconfiguration.
+    #
+    # Every npm bump edits the same package-lock.json, so a batch of
+    # individually-opened PRs all conflict with each other the moment the
+    # first one merges - each survivor then needs a rebase and a fresh CI
+    # run. Grouping collapses a week's worth into one PR that builds and
+    # merges once. Dev and runtime stay in separate groups because they
+    # carry different risk: devDependencies can only break the build (and
+    # CI runs the real lint and build, so a break is caught here), while
+    # runtime deps ship to visitors and deserve their own diff.
+    groups:
+      dev-dependencies:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+      production-dependencies:
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+    # Majors are deliberately left out of both groups above: an ungrouped
+    # major arrives as its own PR, which is what you want for the one
+    # update type that can carry breaking changes.
+
+  # GitHub Actions manifests are always resolved from the repo root's
+  # .github/workflows/. Required here because the workflow steps are
+  # pinned to commit SHAs (see .github/workflows/*.yml): those pins are
+  # frozen at whatever commit was current when they were written, and
+  # without Dependabot watching for new releases they would never move
+  # again on their own. Unlike the npm entry above, this one is productive
+  # immediately - there are five pins to keep current from day one.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    # Action pins don't share a lockfile, so these never conflict the way
+    # the npm ones do - grouped purely to keep routine CI pin bumps to a
+    # single PR instead of one per action.
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
