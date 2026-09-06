@@ -112,9 +112,19 @@
 # because it is a CI change and they need [Web] changes of their own
 # ---------------------------------------------------------------------------
 #
-#   1. There is no branch ruleset requiring these checks, so a red run does not
-#      block a merge today. That is repo-settings work and cannot be done from
-#      here. Until it exists, every gate below is advisory.
+#   1. Only `validate` is a required check. The `protect main` ruleset does
+#      exist - it requires a PR, allows squash merges only, and blocks deletion
+#      and force-pushes - but it was created on 2026-09-05, a day before this
+#      workflow grew the `lighthouse`, `html-validate` and `links` jobs, and its
+#      required-checks list was never updated. So those three are advisory: a PR
+#      that regresses CLS, drops an accessibility score, emits invalid HTML or
+#      breaks a link goes red and merges anyway. Every threshold documented above
+#      is therefore a measurement, not yet an enforced gate. Closing this means
+#      adding the three contexts to the ruleset - repo-settings work that needs
+#      admin on sckerk/sckerk.github.io, which is why it cannot be done from here.
+#
+#      Note also that the ruleset requires zero approving reviews, so nothing
+#      blocks on review either.
 
 name: Pull Request CI
 
