@@ -6,9 +6,10 @@
         "node": "^22.13.0 || ^24.0.0"
     },
     "scripts": {
-        "dev": "npm run resize-images && eleventy --serve",
-        "build": "npm run resize-images && eleventy",
+        "dev": "npm run resize-images && npm run generate-icons && eleventy --serve",
+        "build": "npm run resize-images && npm run generate-icons && eleventy",
         "resize-images": "node scripts/resize-images.mjs",
+        "generate-icons": "node scripts/generate-icons.mjs",
         "lint": "prettier --check ."
     },
     "devDependencies": {

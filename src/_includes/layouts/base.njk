@@ -5,24 +5,69 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
 
-        <title>{{ title or site.title }}</title>
-        <meta name="description" content="{{ description or site.description }}" />
-        {%- for author in site.authors %}
+        {#- Every search-facing string on this page is resolved here, once, from the route registry
+        in src/_data/routes.js keyed by the page's own `key`. Nothing below is hand-typed per page,
+        which is what stopped six pages sharing one generic title and five empty content="" tags.
+        The `title`/`description` fallbacks let a page outside the registry - /404.html - supply its
+        own from front matter; `page.url` backstops the canonical path for the same reason. #} {%-
+        set route = routes.byKey[key] %} {%- set metaTitle = title or route.title or site.title %}
+        {%- set metaDescription = description or route.description or site.description %} {%- set
+        canonicalUrl = site.origin + (route.path if route else page.url) %} {%- set ogImageUrl =
+        site.origin + site.ogImage.path %}
+
+        <title>{{ metaTitle }}</title>
+        <meta name="description" content="{{ metaDescription }}" />
+
+        {#- Absolute, and in the exact trailing-slash form the sitemap uses. /bio and /bio/ are two
+        URLs to a crawler, so scripts/assert-seo.js compares this string against the sitemap entry
+        character for character and fails the build if they diverge. NOTE: keep angle brackets out
+        of Nunjucks comments in this file - prettier parses a tag name inside one as real markup and
+        the file stops parsing. #}
+        <link rel="canonical" href="{{ canonicalUrl }}" />
+        {%- if noindex %}
+        <meta name="robots" content="noindex, follow" />
+        {%- endif %} {%- for author in site.authors %}
         <meta name="author" content="{{ author }}" />
-        {%- endfor %} {# The two icon links that used to sit here carried href="", which is a W3C
-        validation error (href must be non-empty) and makes the browser re-request the page itself
-        as an icon. No icon asset exists in the repo, so they are removed rather than pointed at a
-        404; YEO-139 adds real ones along with the rest of the head metadata. #}
+        {%- endfor %}
 
         <meta name="theme-color" content="{{ site.themeColor }}" />
 
-        {# YEO-139 fills these in, together with the canonical link and the sitemap, all derived
-        from site.origin plus the page's own url. #}
-        <meta property="og:title" content="" />
-        <meta property="og:url" content="" />
-        <meta property="og:image" content="" />
+        {#- Real icon files at last. The two tags that used to sit here carried href="", which is a
+        W3C error and makes every page load re-fetch its own HTML as an icon. All three are built by
+        scripts/generate-icons.mjs from the single source src/icon.svg. favicon.ico is not
+        vestigial: browsers request /favicon.ico by path whether or not it is declared, so omitting
+        it buys a 404 on every first visit. #}
+        <link rel="icon" href="/favicon.ico" sizes="32x32" />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+        {#- og:image must be absolute - most scrapers discard a relative one outright - and so must
+        og:url, which is why both are built from site.origin rather than page-relative paths. #}
+        <meta property="og:type" content="{{ route.ogType if route else 'website' }}" />
         <meta property="og:site_name" content="{{ site.title }}" />
-        <meta property="og:description" content="" />
+        <meta property="og:locale" content="{{ site.locale }}" />
+        <meta property="og:title" content="{{ metaTitle }}" />
+        <meta property="og:description" content="{{ metaDescription }}" />
+        <meta property="og:url" content="{{ canonicalUrl }}" />
+        <meta property="og:image" content="{{ ogImageUrl }}" />
+        <meta property="og:image:width" content="{{ site.ogImage.width }}" />
+        <meta property="og:image:height" content="{{ site.ogImage.height }}" />
+        <meta property="og:image:alt" content="{{ site.ogImage.alt }}" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="{{ metaTitle }}" />
+        <meta name="twitter:description" content="{{ metaDescription }}" />
+        <meta name="twitter:image" content="{{ ogImageUrl }}" />
+        <meta name="twitter:image:alt" content="{{ site.ogImage.alt }}" />
+
+        {#- WebSite on "/" and Person on "/bio/" only. src/_data/structuredData.js explains at
+        length why there is deliberately no VisualArtwork markup. Already serialised there, with "<"
+        escaped, so `safe` here cannot emit a script-closing sequence. #} {%- if structuredData[key]
+        %}
+        <script type="application/ld+json">
+            {{ structuredData[key] | safe }}
+        </script>
+        {%- endif %}
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -52,11 +97,11 @@
             branches on purpose - prettier parses this file as HTML and cannot cope with a Nunjucks
             tag standing in for a tag name. #} {%- if key == "home" %}
             <h1 class="site-title">
-                <a href="/index.html"><span lang="zh-Hant">郭 秀 洙</span> Siew Chu Kerk</a>
+                <a href="/"><span lang="zh-Hant">郭 秀 洙</span> Siew Chu Kerk</a>
             </h1>
             {%- else %}
             <p class="site-title">
-                <a href="/index.html"><span lang="zh-Hant">郭 秀 洙</span> Siew Chu Kerk</a>
+                <a href="/"><span lang="zh-Hant">郭 秀 洙</span> Siew Chu Kerk</a>
             </p>
             {%- endif %}
             <button

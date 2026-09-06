@@ -1,20 +1,21 @@
-{# Route registry lives in src/_data/site.json. `nav: false` on the home entry is why it is absent
-here: home is reachable via the site title link, exactly as it is today. NOTE: keep angle brackets
-out of these Nunjucks comments. Prettier's HTML printer parses tag names inside them as real markup
-and mangles the file. YEO-139: home canonicalises to origin + "/", not /index.html. The list items
-are wrapped in a ul: they were direct children of nav, which is invalid HTML and costs assistive
-technology the list semantics (a screen reader could not say how many items the navigation has).
-role="list" is not redundant here - Safari drops the implicit list role from any list carrying
-list-style: none, which header nav ul does. The current page is marked aria-current="page". The
-whole anchor is duplicated across the branches rather than conditionally emitting a single
-attribute: prettier parses this file with its HTML parser, which mangles a Nunjucks tag that sits
-inside an element's attribute list. #}
+{# Route registry lives in src/_data/routes.js. `routes.nav` is the pre-filtered subset that belongs
+in the nav: home is absent because it is reachable via the site title link, exactly as it is today,
+and Nunjucks cannot call .filter() so the subset is computed in the data file rather than here.
+Paths come from the registry, so the flip from /gallery.html to /gallery/ landed in one place. NOTE:
+keep angle brackets out of these Nunjucks comments. Prettier's HTML printer parses tag names inside
+them as real markup and mangles the file. The list items are wrapped in a ul: they were direct
+children of nav, which is invalid HTML and costs assistive technology the list semantics (a screen
+reader could not say how many items the navigation has). role="list" is not redundant here - Safari
+drops the implicit list role from any list carrying list-style: none, which header nav ul does. The
+current page is marked aria-current="page". The whole anchor is duplicated across the branches
+rather than conditionally emitting a single attribute: prettier parses this file with its HTML
+parser, which mangles a Nunjucks tag that sits inside an element's attribute list. #}
 <nav id="site-nav" aria-label="Main">
     <ul role="list">
-        {%- for p in site.pages %}{% if p.nav %} {% if p.key == key %}
-        <li><a href="{{ p.url }}" aria-current="page">{{ p.label }}</a></li>
+        {%- for p in routes.nav %}{% if p.key == key %}
+        <li><a href="{{ p.path }}" aria-current="page">{{ p.label }}</a></li>
         {%- else %}
-        <li><a href="{{ p.url }}">{{ p.label }}</a></li>
-        {%- endif %}{% endif %}{% endfor %}
+        <li><a href="{{ p.path }}">{{ p.label }}</a></li>
+        {%- endif %}{% endfor %}
     </ul>
 </nav>

@@ -1,0 +1,36 @@
+---
+pagination:
+    data: routes.redirects
+    size: 1
+    alias: route
+permalink: "{{ route.legacy }}"
+eleventyExcludeFromCollections: true
+---
+
+{#- One stub per `legacy` path in the route registry, emitted at the old URL. GitHub Pages serves
+static files only and cannot issue a real 301, so this is the closest available substitute: a
+canonical link naming the new URL (the signal search engines actually consolidate on) plus an
+instant meta refresh (what moves a human). The visible link is the fallback for anything that
+honours neither. noindex keeps the stub itself out of the index while `follow` still passes the
+canonical along. This is a compromise, not a 301 - preserving ranking perfectly would mean a host
+that can send real redirect status codes, which is a bigger decision than this ticket. These stubs
+and the directory-URL flip in the page front matter are one change and must never ship apart:
+without them every inbound link to /bio.html 404s the moment the flip lands. -#}
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <title>Moved — {{ route.title }}</title>
+        <link rel="canonical" href="{{ site.origin }}{{ route.path }}" />
+        <meta http-equiv="refresh" content="0; url={{ route.path }}" />
+        <meta name="robots" content="noindex, follow" />
+        <meta name="description" content="{{ route.description }}" />
+    </head>
+    <body>
+        <p>
+            This page has moved to
+            <a href="{{ route.path }}">{{ site.origin }}{{ route.path }}</a>.
+        </p>
+    </body>
+</html>

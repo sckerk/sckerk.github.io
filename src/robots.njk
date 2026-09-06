@@ -1,0 +1,11 @@
+---
+permalink: /robots.txt
+eleventyExcludeFromCollections: true
+---
+{#- The origin is interpolated rather than typed so the Sitemap line cannot drift from the canonical
+links. This file is in .prettierignore: Prettier formats *.njk with its HTML parser, which collapses
+plain text onto one line, and a one-line robots.txt is not a valid robots.txt. -#}
+User-agent: *
+Allow: /
+
+Sitemap: {{ site.origin }}/sitemap.xml
