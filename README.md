@@ -199,11 +199,14 @@ Three jobs run in parallel after `validate`, against the built output:
 
 Every threshold was measured on the finished site rather than guessed, and
 the workflow's header comment records what was measured, what the gate was
-set to, and why. Two of them — performance and CLS — are asserted against
-the best of three runs rather than the median, because a real layout shift
-makes both metrics bimodal; that gap and the `/gallery/` accessibility
-exception are both written up under "KNOWN GAPS" in the same comment.
-Read them before changing a number.
+set to, and why. Read it before changing a number — in particular the
+performance and CLS floors, which are deliberately loose. A real layout
+shift (the nav collapsing once `js/nav.js` runs) makes both metrics
+bimodal, and on a CI runner the shifted mode is the common one, so those
+two gates are pinned just outside it and catch only catastrophic
+regressions. Fixing the shift is what allows them to be tightened. That
+gap and the `/gallery/` accessibility exception are both written up under
+"KNOWN GAPS" in the same comment.
 
 Note that a green Lighthouse accessibility score is not an accessibility
 audit. It catches roughly a third of real issues and cannot tell you
