@@ -207,16 +207,17 @@ and YEO-143 removed that shift and took them back to `>= 0.95` and
 `<= 0.05`. Accessibility, SEO and best practices all gate at 100 on every
 one of the five pages; `/gallery/` was the one exception, until YEO-144
 moved the carousel's `role="group"` off each `<li>` and onto a wrapper
-inside it. The only entry left under "KNOWN GAPS" in that comment is the
-missing branch ruleset.
+inside it.
 
 Note that a green Lighthouse accessibility score is not an accessibility
 audit. It catches roughly a third of real issues and cannot tell you
 whether alt text is accurate or whether focus order makes sense.
 
-**There is no branch ruleset requiring these checks**, so a red run does
-not block a merge today. Until one is configured in repo settings, the
-gates are advisory.
+**All four checks are required on `main`**, through the `protect main`
+repository ruleset. It also requires a pull request, allows squash merges
+only, and blocks deletion and force-pushes, so a red run blocks the merge.
+It requires zero approving reviews, which means review is the one thing
+nothing gates on.
 
 ## Hosting
 

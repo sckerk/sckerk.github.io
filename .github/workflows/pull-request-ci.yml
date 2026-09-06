@@ -108,23 +108,19 @@
 # not replace the manual pass in YEO-140, and 100 here is not an audit.
 #
 # ---------------------------------------------------------------------------
-# KNOWN GAPS - real defects this workflow measures but deliberately does not fix,
-# because it is a CI change and they need [Web] changes of their own
+# ENFORCEMENT
 # ---------------------------------------------------------------------------
 #
-#   1. Only `validate` is a required check. The `protect main` ruleset does
-#      exist - it requires a PR, allows squash merges only, and blocks deletion
-#      and force-pushes - but it was created on 2026-09-05, a day before this
-#      workflow grew the `lighthouse`, `html-validate` and `links` jobs, and its
-#      required-checks list was never updated. So those three are advisory: a PR
-#      that regresses CLS, drops an accessibility score, emits invalid HTML or
-#      breaks a link goes red and merges anyway. Every threshold documented above
-#      is therefore a measurement, not yet an enforced gate. Closing this means
-#      adding the three contexts to the ruleset - repo-settings work that needs
-#      admin on sckerk/sckerk.github.io, which is why it cannot be done from here.
+# All four jobs below are required checks on `main`, through the `protect main`
+# repository ruleset, which also requires a pull request, allows squash merges
+# only, and blocks deletion and force-pushes. A red run blocks the merge, so the
+# thresholds above are enforced gates rather than measurements. Until 2026-09-06
+# only `validate` was required and the other three were advisory; if a gate here
+# ever needs to stop blocking, change it in the ruleset deliberately rather than
+# by loosening a number in this file.
 #
-#      Note also that the ruleset requires zero approving reviews, so nothing
-#      blocks on review either.
+# The one thing nothing here gates on is review: the ruleset requires zero
+# approving reviews.
 
 name: Pull Request CI
 
