@@ -35,11 +35,15 @@ landmark. #}
                 aria-label="Work {{ work.position }} of {{ gallery.works | length }}"
             >
                 <picture>
-                    <source type="image/webp" srcset="{{ work.srcsetWebp }}" sizes="610px" />
+                    <source
+                        type="image/webp"
+                        srcset="{{ work.srcsetWebp }}"
+                        sizes="(min-width: 40rem) 610px, calc(100vw - 30px)"
+                    />
                     <img
                         src="{{ work.src }}"
                         srcset="{{ work.srcsetJpeg }}"
-                        sizes="610px"
+                        sizes="(min-width: 40rem) 610px, calc(100vw - 30px)"
                         width="{{ work.width }}"
                         height="{{ work.height }}"
                         alt="{{ work.alt }}"
@@ -53,10 +57,12 @@ landmark. #}
         </ul>
     </div>
 
-    {# The two sizes values above and below are the real layout boxes, not guesses: #slideshow is
-    pinned to 610px at every viewport, and a pager cell is 20% of the 900px .gallery-page less its
-    10px gutter (170px), or 20% of 400px less the same gutter on mobile (70px). YEO-138 makes those
-    boxes fluid and must revisit both. The pager is plain anchors to each slide's fragment. With
+    {# The two sizes values above and below are the real layout boxes, not guesses, and YEO-138
+    rewrote both when it made the boxes fluid. #slideshow is min(610px, 100vw - 30px) - the two
+    cross at 640px, which is the 40rem above. A pager cell is 20% of .gallery-page's inner width
+    less its 10px gutter: 870px inner once the 900px cap bites (164px), and (100vw - 30px) below
+    that, which reduces to calc(20vw - 16px). Both conditions are min-width, like every breakpoint
+    in the stylesheet. The pager is plain anchors to each slide's fragment. With
     scroll-behavior:smooth on the scroller the browser brings the slide into view natively, so the
     pager works fully with JavaScript disabled - which the Cycle2 pager did not. js/gallery.js only
     adds the active highlight and arrow keys on top. The thumbnails are alt="" deliberately. They
@@ -71,12 +77,12 @@ landmark. #}
                 <source
                     type="image/webp"
                     srcset="{{ work.srcsetWebp }}"
-                    sizes="(max-width: 767px) 70px, 170px"
+                    sizes="(min-width: 56.25rem) 164px, calc(20vw - 16px)"
                 />
                 <img
                     src="{{ work.src }}"
                     srcset="{{ work.srcsetJpeg }}"
-                    sizes="(max-width: 767px) 70px, 170px"
+                    sizes="(min-width: 56.25rem) 164px, calc(20vw - 16px)"
                     width="{{ work.width }}"
                     height="{{ work.height }}"
                     alt=""

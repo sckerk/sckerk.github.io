@@ -1,3 +1,20 @@
+/**
+ * 1.0 Type, box model and the responsive scale (YEO-138)
+ *
+ * The whole file is mobile-first: the base rules describe the narrow case and
+ * every layer above it is a `min-width` query. There is exactly one breakpoint
+ * direction in the codebase now, so no two queries can match the same pixel
+ * (the old file mixed `min-width: 767px` with `max-width: 767px`, and both
+ * applied at exactly 767px).
+ *
+ * The scale is base / 48rem (768px) / 64rem (1024px). Only 48rem carries rules
+ * today - it is where the header collapses to a single row and where the
+ * homepage hero stops sharing the viewport with the header - and a breakpoint
+ * with nothing behind it is a breakpoint that drifts, so 64rem is the agreed
+ * next step rather than an empty block sitting in the file. Anything added
+ * must be `min-width` and must land on one of these two numbers.
+ */
+
 h1,
 h2,
 h3,
@@ -20,19 +37,37 @@ dd {
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
-.desktop {
-    display: none;
-}
-.mobile {
-    display: block;
-}
-@media (min-width: 767px) {
-    .desktop {
-        display: block;
-    }
-    .mobile {
-        display: none;
-    }
+
+/* The `.desktop` / `.mobile` display toggles that used to sit here are gone.
+   They shipped both copies of whatever they wrapped to every visitor, and no
+   page in the site ever carried either class. */
+
+:root {
+    /* The header's own metrics. --header-height is derived from them rather
+       than typed as a number, so the clearance below the header cannot drift
+       away from the header's real size when the type scale changes. */
+    --header-padding: 0.625rem; /* 10px, the header's block padding */
+    --nav-link-size: 0.875rem; /* 14px */
+    --nav-link-padding: 1.875rem; /* 30px */
+
+    /* Continuous 16px -> 48px scale. It replaces the 48px desktop / 20px
+       mobile pair, which jumped between the two at a single pixel. 48px is
+       reached at 1234px and held from there up, so 1440px renders at exactly
+       the size it does today. */
+    --site-title-size: clamp(1rem, 0.3rem + 3.5vw, 3rem);
+    /* 5/3 is exact: 48px x 5/3 = the 80px line box the desktop h1 has today. */
+    --site-title-line: calc(var(--site-title-size) * 5 / 3);
+
+    /* Below 48rem the nav is its own row (or collapsed), so the header is one
+       title tall. The tablet layer redefines this. */
+    --header-row: var(--site-title-line);
+    --header-height: calc(var(--header-row) + 2 * var(--header-padding));
+
+    /* Breathing room between the header and the first line of content. Scales
+       on the same curve as the title and tops out at 50px, which is what the
+       inert `top: 150px` rules were reaching for: 101px of desktop header plus
+       a 50px gap. */
+    --content-gap: clamp(1.5rem, 0.75rem + 3.75vw, 3.125rem);
 }
 
 html {
@@ -54,15 +89,31 @@ body {
     height: 0;
 }
 
+/* Sticky, not fixed, below the tablet breakpoint.
+
+   A `position: fixed` header is out of flow, so the page has to reserve space
+   for it with padding - and that reserved number is only correct while the
+   header's height is a constant. It is not: the nav panel opens inside the
+   header, and with JavaScript disabled the panel is permanently open (see
+   js/nav.js for why that is the no-JS fallback). A sticky header is in flow,
+   so it reserves its own space at whatever height it currently is, stays
+   pinned while scrolling exactly as the fixed one did, and needs no clearance
+   padding at all. Desktop keeps `position: absolute` unchanged - there the
+   header genuinely does overlay the homepage hero, and --header-height is what
+   the content containers clear it by. */
 header {
-    position: absolute;
-    width: 100%;
+    position: sticky;
     top: 0;
     left: 0;
-    padding: 10px;
+    width: 100%;
+    padding: var(--header-padding);
     z-index: 100;
     display: flex; /* was: h1 float:left + nav BFC beside it */
+    flex-wrap: wrap;
     align-items: flex-start;
+    /* Opaque only while it is sticky and can travel over content. The desktop
+       layer takes it back to transparent over the homepage carousel. */
+    background: #fff;
 }
 /* The site title is an h1 on the homepage and a paragraph on every other page,
    where the page's own heading is the h1 (YEO-140: exactly one h1 per page).
@@ -73,10 +124,15 @@ header {
     font-family: "Orbitron", sans-serif;
     font-weight: 300;
     margin: 0;
-    line-height: 80px;
-    font-size: 48px;
+    line-height: var(--site-title-line);
+    font-size: var(--site-title-size);
     padding: 0 15px; /* was Bootstrap's .col-* base padding */
-    flex: 0 0 100%;
+    /* Shares row one with the toggle. `min-width: 0` lets the title wrap on a
+       320px screen instead of pushing the toggle off the right edge; because
+       the header is in flow at this width, a wrapped title just makes the
+       header taller and nothing has to be re-measured. */
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .site-title a {
@@ -85,50 +141,64 @@ header {
     font-family: "Orbitron", sans-serif;
     font-weight: 300;
 }
-header nav {
-    /* Asymmetric on purpose - this is what the Bootstrap cascade actually
-       computed, measured with getComputedStyle on the pre-change pages.
-       This rule used to say `padding: 0`, but as an element selector (0,0,2)
-       it lost to both of the class selectors (0,1,0) below, whatever the
-       source order:
-         .col-1..12 base  {padding-left:15px; padding-right:15px}  byte 9713
-         .nav             {padding-left:0}                        byte 58596
-       Equal specificity, so `.nav` wins on source order and padding-left
-       resolved to 0, while `.col-*`'s padding-right:15px survived untouched.
-       Do not "tidy" this to `padding: 0 15px`: the nav is a flex item now,
-       and a left gutter pushes its min-content size past its flex basis, so
-       the box grows rightward and adds ~6px of horizontal scroll at exactly
-       768px that the old block-level nav never had.
 
-       `min-width: 0` is part of the same repair. A flex item defaults to
-       `min-width: auto`, which refuses to shrink below min-content; the old
-       nav was a block box with `max-width: 50%` that simply let its content
-       overflow. Without this the box is 1.1px wider than it used to be at
-       768px. Measured old vs new at 768/790/820/1440: identical. */
-    padding: 0 15px 0 0;
-    margin: 0;
-    min-width: 0;
-    display: flex; /* was Bootstrap .nav */
-    justify-content: flex-end; /* was Bootstrap .justify-content-end */
+/* The mobile toggle was a <div>; it is a <button> now, so the UA's button
+   chrome has to be neutralised, and its <span> bars re-blockified. It ships
+   with the `hidden` attribute and js/nav.js reveals it - the button is only
+   meaningful once something can act on the click. */
+.nav-toggle {
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    border: 0;
+    font: inherit;
+    cursor: pointer;
+    /* 30px of bars inside a 44x44 box: the bars look exactly as they did, and
+       the tap target clears the 44px minimum with no visible change. */
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+    margin-left: auto;
+}
+.nav-toggle .line {
+    display: block;
+}
+
+header nav {
+    /* Row two below the tablet breakpoint: a full-width white dropdown under
+       the title, which is what the old mobile `header nav` rule described. */
     flex: 0 0 100%;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    background: #fff;
 }
-@media (min-width: 768px) {
-    /* was Bootstrap's .col-md-6 breakpoint */
-    .site-title,
-    header nav {
-        flex: 0 0 50%;
-    }
-    .nav-toggle {
-        /* was .hidden-md-up */
-        display: none;
-    }
+/* Collapsed only once js/nav.js has run and put `.js-nav` on <html>. Without
+   JavaScript the toggle stays hidden and the nav stays visible, so the links
+   are always reachable - a menu that exists only with JS is the failure mode
+   this ordering exists to avoid. */
+.js-nav header nav {
+    display: none;
 }
+.js-nav header nav.is-open {
+    display: flex;
+}
+
 /* The nav's items are in a ul now (they were bare li children of nav, which is
    invalid). The ul is the single flex item inside nav and carries the row
    itself, so the geometry nav used to produce is unchanged: the UA's ul margin
    and 40px padding-left are zeroed, and flex-end still packs the items right. */
 header nav ul {
     display: flex;
+    flex-direction: column;
+    width: 100%;
     justify-content: flex-end;
     list-style: none;
     margin: 0;
@@ -140,7 +210,7 @@ header nav a:visited {
     display: block;
     text-decoration: none;
     color: #555;
-    font-size: 14px;
+    font-size: var(--nav-link-size);
     -webkit-transition: color 0.3s;
     -moz-transition: color 0.3s;
     transition: color 0.3s;
@@ -156,22 +226,78 @@ header nav a:active {
 }
 
 header nav a {
-    padding: 30px; /* folded in from the old `header .nav-item` */
+    /* folded in from the old `header .nav-item`. A 14px line box plus 60px of
+       padding is an 81px tall target - comfortably over 44px in both axes. */
+    padding: var(--nav-link-padding);
 }
 
-/* The mobile toggle was a <div>; it is a <button> now, so the UA's button
-   chrome has to be neutralised, and its <span> bars re-blockified. */
-.nav-toggle {
-    appearance: none;
-    -webkit-appearance: none;
-    background: none;
-    border: 0;
-    padding: 0;
-    font: inherit;
-    cursor: pointer;
-}
-.nav-toggle .line {
-    display: block;
+@media (min-width: 48rem) {
+    :root {
+        /* From here up the nav shares row one with the title, so the header is
+           as tall as whichever of the two is taller. A nav link's box is its
+           1.5 line box plus its padding, top and bottom. On desktop that is
+           81px against the title's 80px, which is the 101px header (padding
+           included) the site has today. */
+        --header-row: max(
+            var(--site-title-line),
+            calc(var(--nav-link-size) * 1.5 + 2 * var(--nav-link-padding))
+        );
+    }
+
+    header {
+        /* Out of flow again: the homepage hero runs underneath it. */
+        position: absolute;
+        top: 0;
+        flex-wrap: nowrap;
+        background: none;
+    }
+
+    /* was Bootstrap's .col-md-6 breakpoint */
+    .site-title,
+    header nav {
+        flex: 0 0 50%;
+    }
+
+    .nav-toggle {
+        /* was .hidden-md-up, a Bootstrap 4 alpha class that never shipped */
+        display: none;
+    }
+
+    header nav,
+    .js-nav header nav,
+    .js-nav header nav.is-open {
+        /* The horizontal bar is unconditional here: the toggle is gone, so
+           there is no open/closed state to honour above this width. */
+        display: flex;
+        justify-content: flex-end;
+        background: none;
+        /* Asymmetric on purpose - this is what the Bootstrap cascade actually
+           computed, measured with getComputedStyle on the pre-change pages.
+           This rule used to say `padding: 0`, but as an element selector (0,0,2)
+           it lost to both of the class selectors (0,1,0) below, whatever the
+           source order:
+             .col-1..12 base  {padding-left:15px; padding-right:15px}  byte 9713
+             .nav             {padding-left:0}                        byte 58596
+           Equal specificity, so `.nav` wins on source order and padding-left
+           resolved to 0, while `.col-*`'s padding-right:15px survived untouched.
+           Do not "tidy" this to `padding: 0 15px`: the nav is a flex item now,
+           and a left gutter pushes its min-content size past its flex basis, so
+           the box grows rightward and adds ~6px of horizontal scroll at exactly
+           768px that the old block-level nav never had.
+
+           `min-width: 0` is part of the same repair. A flex item defaults to
+           `min-width: auto`, which refuses to shrink below min-content; the old
+           nav was a block box with `max-width: 50%` that simply let its content
+           overflow. Without this the box is 1.1px wider than it used to be at
+           768px. Measured old vs new at 768/790/820/1440: identical. */
+        padding: 0 15px 0 0;
+        min-width: 0;
+    }
+
+    header nav ul {
+        flex-direction: row;
+        width: auto;
+    }
 }
 
 /**
@@ -180,29 +306,66 @@ header nav a {
 
 /* Was #main. The id moved to the layout's main landmark, which wraps every
    page, so these gallery-only metrics had to stop being keyed to it.
-   max-width caps the fixed width instead of overflowing narrow viewports
-   (WCAG 1.4.10 reflow); the responsive work itself is YEO-138's. */
+   Fluid with a 900px cap rather than a fixed 900px (WCAG 1.4.10 reflow); the
+   old `width: 400px` mobile override - wider than a 375px iPhone viewport, and
+   the reason the gallery scrolled sideways - is gone entirely. */
 .gallery-page {
-    width: 900px;
-    max-width: 100%;
-    margin: 50px auto;
+    width: 100%;
+    max-width: 900px;
+    margin-inline: auto;
+    margin-block-end: 50px;
+    padding-inline: 15px;
 }
+
+/* Clearing the header.
+
+   This replaces the `top: 150px` on .bio, .contact and .events. Those were
+   written when the three had no `position` at all and `top` was inert, but
+   they are not inert in this tree: .page carries `position: relative` (ported
+   verbatim from Bootstrap's .container-fluid), so all three have been paying
+   out a 150px relative offset. A relative offset moves where a box paints
+   without changing where it sits, so every one of those pages reserved no room
+   for the shift and ended with 150px of empty document under the footer - and
+   .gallery-page, which never had the offset, was left with its slideshow
+   underneath the header. Padding does the same job as real space, on all four.
+
+   Below the tablet breakpoint the header is in flow and reserves its own
+   space, so only the gap is needed; from 48rem up the header is absolutely
+   positioned and the containers clear its measured height as well. */
+.page,
+.gallery-page {
+    padding-block-start: var(--content-gap);
+}
+@media (min-width: 48rem) {
+    .page,
+    .gallery-page {
+        padding-block-start: calc(var(--header-height) + var(--content-gap));
+    }
+}
+
 /* The gallery slideshow. Was jQuery Cycle2 over background-image divs; it is
-   CSS scroll-snap over real <img> elements now (YEO-137). The 610x600 box is
-   unchanged and still hardcoded - YEO-138 owns making it fluid, and the sizes
-   attributes in gallery.njk are written against these exact numbers. */
+   CSS scroll-snap over real <img> elements now (YEO-137). YEO-138 makes the
+   box fluid: the 610x600 shape is kept as an aspect-ratio and the width is
+   capped rather than fixed, so the frame shrinks with the viewport instead of
+   overflowing it. The scroll-snap mechanics below are untouched. */
 #slideshow {
-    width: 610px;
-    height: 600px;
+    width: 100%;
+    max-width: 610px;
+    aspect-ratio: 61 / 60; /* was width: 610px; height: 600px */
+    /* Landscape phones are around 390px tall, and a slideshow taller than the
+       viewport leaves nothing else visible. dvh, not vh: vh on mobile measures
+       to the bottom of the retracting URL bar, so a vh-sized box is taller
+       than what is on screen. The vh line is the pre-dvh fallback. */
+    max-height: 80vh;
+    max-height: 80dvh;
     margin: 0 auto;
-    /*padding: 0 10px 0 0;*/
     /* #slideshow is the scroll container itself, so the region, its accessible
        name, tabindex and the arrow-key handler all sit on one element. */
     overflow-x: auto;
     overflow-y: hidden;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
-    /* A visible scrollbar would eat into the fixed 600px height. */
+    /* A visible scrollbar would eat into the frame's height. */
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -248,6 +411,9 @@ header nav a {
     display: block;
     clear: both;
 }
+/* 20% of the container less a 10px gutter. At 320px that is a 58x58 target
+   around a 48px thumbnail, so the smallest supported screen still clears the
+   44px minimum without a separate rule. */
 #pager a {
     float: left;
     width: 20%;
@@ -295,7 +461,7 @@ header nav a {
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
     /* Hide the scrollbar: on always-visible-scrollbar platforms it would
-       otherwise eat into the 100vh slide. */
+       otherwise eat into the full-height slide. */
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -305,8 +471,8 @@ header nav a {
 .carousel-slide {
     /* was .carousel-item */
     position: relative;
-    /* was 100vw: the page now has a footer under the 100vh carousel, so it
-       scrolls vertically, and on platforms with classic scrollbars 100vw is
+    /* was 100vw: the page now has a footer under the full-height carousel, so
+       it scrolls vertically, and on platforms with classic scrollbars 100vw is
        wider than the track by the scrollbar's width - enough to push the right
        edge of every slide out of view. 100% of the track is the same number of
        pixels whenever no scrollbar is present. */
@@ -315,12 +481,27 @@ header nav a {
 }
 .carousel-slide img {
     width: 100%; /* was 100vw; see .carousel-slide */
-    height: 100vh;
+    /* dvh, with the vh line as the pre-dvh fallback: 100vh on a phone measures
+       to the bottom of the retracting URL bar, so a 100vh hero is taller than
+       the screen and the page starts life mid-scroll. The header is in flow at
+       this width, so the hero takes what is left of the viewport. */
+    height: calc(100vh - var(--header-height));
+    height: calc(100dvh - var(--header-height));
+    /* The mobile rule this replaces was `width: auto; height: 100vh%` - not a
+       valid value, so the whole declaration was dropped and the intent (keep
+       the photograph's own proportions) never rendered. `width: auto` would
+       not have worked either: on a portrait phone a viewport-height image is
+       far wider than the screen, which is horizontal scroll by construction.
+       object-fit is how that intent is expressed on a box that has to be
+       exactly as wide as the viewport - the artwork keeps its proportions and
+       the frame crops it, instead of the image being stretched to fit. */
+    object-fit: cover;
+    object-position: center;
 }
 .carousel .caption {
     /* was position:fixed. All slides are now permanently in the DOM and
        displayed, so three fixed captions would stack on top of each other.
-       The slide is 100vw x 100vh at the top of the page, so absolute
+       The slide fills the viewport at the top of the page, so absolute
        positioning inside it lands on the identical pixels. */
     position: absolute;
     display: none; /* was .d-none */
@@ -340,7 +521,13 @@ header nav a {
     font-size: 1em;
     margin: 1.33em 0;
 }
-@media (min-width: 768px) {
+@media (min-width: 48rem) {
+    .carousel-slide img {
+        /* The header is out of flow from here up, so the hero is the full
+           viewport again, exactly as it is today. */
+        height: 100vh;
+        height: 100dvh;
+    }
     /* was .d-md-block */
     .carousel .caption {
         display: block;
@@ -363,21 +550,33 @@ header nav a {
 }
 .carousel-dots li {
     position: relative;
-    flex: 1 0 auto;
-    max-width: 30px;
+    flex: 0 0 auto;
     margin-right: 3px;
     margin-left: 3px;
 }
+/* The visible indicator is the same 30x3 bar it has always been, but the bar
+   is drawn by a pseudo-element so the anchor itself can be a 44x44 tap target.
+   `align-items: flex-end` keeps the bar on the pixels it occupies today: the
+   target grows upward, over the photograph, not downward past the slide. */
 .carousel-dots a {
-    display: block;
-    height: 3px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
     text-indent: -999px;
     overflow: hidden;
     text-decoration: none;
     cursor: pointer;
+}
+.carousel-dots a::before {
+    content: "";
+    display: block;
+    width: 30px; /* was the li's max-width */
+    height: 3px; /* was the a's height */
     background-color: rgba(255, 255, 255, 0.5);
 }
-.carousel-dots a[aria-current="true"] {
+.carousel-dots a[aria-current="true"]::before {
     background-color: #fff; /* was .carousel-indicators .active */
 }
 
@@ -470,35 +669,52 @@ header nav a {
     margin-right: auto;
     padding-left: 15px;
     padding-right: 15px;
+    /* The bio carries long exhibition titles and the events page is bilingual.
+       Without this a single unbroken run of text sets the container's
+       min-content width and drags a horizontal scrollbar onto the page. */
+    overflow-wrap: anywhere;
 }
 
 .bio-list {
-    /* was .row + .col-12 .col-sm-4 / .col-sm-8 */
+    /* was .row + .col-12 .col-sm-4 / .col-sm-8. One column by default; the
+       year/description pair splits at the same 48rem the rest of the site uses
+       (it was Bootstrap's 576px sm breakpoint, written as a max-width). */
     display: grid;
-    grid-template-columns: 33.333333% 66.666667%;
+    grid-template-columns: 1fr;
     margin: 0 -15px; /* was Bootstrap .row's negative gutters */
 }
 .bio-list dt,
 .bio-list dd {
-    margin: 1em 0; /* the <p> margins these replace */
     padding: 0 15px; /* was the .col-* base padding */
 }
 .bio-list dt {
-    text-align: center; /* was .text-center */
     font-weight: 400;
+    /* Stacked, the year has to read as the heading of the entry under it, so
+       it sits tight against its own dd and the 1em gap falls between entries
+       instead of inside them. */
+    margin: 1em 0 0;
 }
 .bio-list dd {
-    margin-left: 0;
+    margin: 0.25em 0 0;
 }
-@media (max-width: 575.98px) {
-    /* Bootstrap's sm breakpoint, unchanged */
+@media (min-width: 48rem) {
     .bio-list {
-        grid-template-columns: 1fr;
+        grid-template-columns: 33.333333% 66.666667%;
+    }
+    /* Side by side the association is positional, and the original <p> margins
+       come back. */
+    .bio-list dt,
+    .bio-list dd {
+        margin: 1em 0;
+    }
+    .bio-list dt {
+        text-align: center; /* was .text-center */
     }
 }
 
 .bio {
-    top: 150px;
+    /* A ~600px measure for the artist statement. The `top: 150px` that used to
+       sit here is now padding on .page - see the clearance rules in 5.0. */
     max-width: 600px;
 }
 
@@ -513,52 +729,19 @@ header nav a {
 }
 
 .contact {
-    top: 150px;
     text-align: center;
 }
 
 .contact a {
     display: block;
     color: black;
-    padding: 50px;
+    /* was a flat 50px, which left only ~190px of line on a 320px screen. The
+       24px floor still makes each link a ~65px tall target. */
+    padding: clamp(1.5rem, 5vw, 50px);
 }
 
 .events {
-    top: 150px;
     text-align: center;
-}
-
-@media (max-width: 767px) {
-    .carousel-slide img {
-        width: auto;
-        height: 100vh%;
-    }
-    #pager {
-        margin: 0px 15px;
-    }
-    .gallery-page {
-        width: 400px;
-    }
-    header {
-        position: fixed;
-    }
-    /* Was `.nav` - the Bootstrap class this PR removes. Selector rewritten
-       so the mobile nav still collapses; declarations untouched. */
-    header nav {
-        display: none;
-        text-align: center;
-        background: white;
-    }
-    .site-title {
-        font-size: 20px;
-        line-height: 40px;
-    }
-}
-
-#mobile-nav-button {
-    right: 20px;
-    top: 10px;
-    position: absolute;
 }
 
 .line {
@@ -610,6 +793,7 @@ button:focus-visible,
 .site-footer {
     padding: 40px 15px;
     text-align: center;
+    overflow-wrap: anywhere;
 }
 .site-footer p {
     margin: 0;
