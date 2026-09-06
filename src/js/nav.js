@@ -2,21 +2,23 @@
 // focus styling are YEO-140's and are not touched here; this file owns the
 // open/closed state and nothing else.
 //
-// Progressive enhancement, in this order and for this reason: the button ships
-// with the `hidden` attribute and the nav ships visible, so a visitor without
-// JavaScript gets a permanently expanded menu rather than a control that does
-// nothing next to a panel that never opens. Revealing the button and letting
-// CSS collapse the panel are therefore the same act - `.js-nav` on <html> is
-// what tells the stylesheet a toggle now exists (see `.js-nav header nav` in
-// css/style.css). Above 48rem the panel is shown unconditionally and the
-// button is display:none, so none of this applies to the desktop nav.
+// The no-JavaScript contract is unchanged and is still the reason the ordering
+// exists: a visitor without JavaScript gets a permanently expanded menu rather
+// than a control that does nothing next to a panel that never opens. What
+// changed in YEO-143 is *where* that contract lives. It used to be this file:
+// the nav shipped expanded and this script collapsed it by adding `.js-nav`.
+// Because this script is deferred, the collapse always landed after first paint
+// and shifted the whole page (CLS 0.363). The contract is now in the markup -
+// `class="no-js"` on <html> in the base layout, read by css/style.css - and
+// js/nav-init.js, loaded synchronously in <head>, removes it before paint.
+// Nothing in the header therefore moves once the page is painted.
+//
+// Above 48rem the panel is shown unconditionally and the button is
+// display:none, so none of this applies to the desktop nav.
 (function () {
     var button = document.getElementById("mobile-nav-button");
     var nav = document.getElementById("site-nav");
     if (!button || !nav) return;
-
-    document.documentElement.classList.add("js-nav");
-    button.hidden = false;
 
     function isOpen() {
         return button.getAttribute("aria-expanded") === "true";

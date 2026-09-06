@@ -162,9 +162,10 @@ header {
 }
 
 /* The mobile toggle was a <div>; it is a <button> now, so the UA's button
-   chrome has to be neutralised, and its <span> bars re-blockified. It ships
-   with the `hidden` attribute and js/nav.js reveals it - the button is only
-   meaningful once something can act on the click. */
+   chrome has to be neutralised, and its <span> bars re-blockified. It is
+   visible by default and hidden by `.no-js .nav-toggle` below - the button is
+   only meaningful once something can act on the click, and painting it and then
+   removing it is a layout shift (YEO-143). */
 .nav-toggle {
     appearance: none;
     -webkit-appearance: none;
@@ -190,24 +191,38 @@ header {
 
 header nav {
     /* Row two below the tablet breakpoint: a full-width white dropdown under
-       the title, which is what the old mobile `header nav` rule described. */
+       the title, which is what the old mobile `header nav` rule described.
+
+       Collapsed by default (YEO-143). It used to ship expanded and be collapsed
+       by `.js-nav header nav`, a class js/nav.js added - and because that script
+       is deferred, the collapse always happened after first paint and moved
+       every page down by CLS 0.363. The default is now the state the vast
+       majority of visitors end up in, so it is also the state they are painted,
+       and `.no-js` below re-expands it for the minority who cannot toggle it. */
     flex: 0 0 100%;
     padding: 0;
     margin: 0;
-    display: flex;
+    display: none;
     justify-content: center;
     text-align: center;
     background: #fff;
 }
-/* Collapsed only once js/nav.js has run and put `.js-nav` on <html>. Without
-   JavaScript the toggle stays hidden and the nav stays visible, so the links
-   are always reachable - a menu that exists only with JS is the failure mode
-   this ordering exists to avoid. */
-.js-nav header nav {
-    display: none;
-}
-.js-nav header nav.is-open {
+header nav.is-open {
     display: flex;
+}
+
+/* The no-JavaScript fallback, and the whole of it. `no-js` is on <html> in the
+   markup (src/_includes/layouts/base.njk) and js/nav-init.js removes it in
+   <head> before the first paint, so these two rules describe what a visitor
+   without scripting keeps: the nav permanently open, and no toggle button next
+   to it, because nothing would act on the click. A menu that exists only with
+   JavaScript is the failure mode this pair exists to avoid - do not delete
+   either rule without deleting the class from the layout too. */
+.no-js header nav {
+    display: flex;
+}
+.no-js .nav-toggle {
+    display: none;
 }
 
 /* The nav's items are in a ul now (they were bare li children of nav, which is
@@ -301,8 +316,8 @@ header nav a {
     }
 
     header nav,
-    .js-nav header nav,
-    .js-nav header nav.is-open {
+    header nav.is-open,
+    .no-js header nav {
         /* The horizontal bar is unconditional here: the toggle is gone, so
            there is no open/closed state to honour above this width. */
         display: flex;

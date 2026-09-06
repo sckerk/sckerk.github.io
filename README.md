@@ -15,7 +15,8 @@ a bio (statement, education, exhibitions, publications), and contact
 
 The site is built with [Eleventy](https://www.11ty.dev/) and Nunjucks
 templates under `src/`. No client framework, no bundler; the only shipped
-JavaScript is three small vanilla files under `src/js/`.
+JavaScript is six small vanilla files under `src/js/`, one of
+which (`nav-init.js`) is a single statement loaded from `<head>`.
 
 ## Requirements
 
@@ -199,14 +200,12 @@ Three jobs run in parallel after `validate`, against the built output:
 
 Every threshold was measured on the finished site rather than guessed, and
 the workflow's header comment records what was measured, what the gate was
-set to, and why. Read it before changing a number — in particular the
-performance and CLS floors, which are deliberately loose. A real layout
-shift (the nav collapsing once `js/nav.js` runs) makes both metrics
-bimodal, and on a CI runner the shifted mode is the common one, so those
-two gates are pinned just outside it and catch only catastrophic
-regressions. Fixing the shift is what allows them to be tightened. That
-gap and the `/gallery/` accessibility exception are both written up under
-"KNOWN GAPS" in the same comment.
+set to, and why. Read it before changing a number. The performance and CLS
+floors have the longest history: they were loosened to `>= 0.80` and
+`<= 0.40` while the nav collapsed after first paint and shifted every page,
+and YEO-143 removed that shift and took them back to `>= 0.95` and
+`<= 0.05`. The `/gallery/` accessibility exception is still open and is
+written up under "KNOWN GAPS" in the same comment.
 
 Note that a green Lighthouse accessibility score is not an accessibility
 audit. It catches roughly a third of real issues and cannot tell you

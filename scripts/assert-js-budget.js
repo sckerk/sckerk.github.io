@@ -23,10 +23,10 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 // 10 KB uncompressed per page. Measured worst case at the time of writing is
-// the homepage at 7,129 bytes (header.js + nav.js + carousel.js), so there is
-// ~3 KB of headroom - room for a genuinely new behaviour, nowhere near room for
-// a framework. Raising this should be a conscious decision with a reason in the
-// commit message, not a reflex when the build goes red.
+// the homepage at 7,927 bytes (nav-init.js + header.js + nav.js + carousel.js),
+// so there is ~2 KB of headroom - room for a genuinely new behaviour, nowhere
+// near room for a framework. Raising this should be a conscious decision with a
+// reason in the commit message, not a reflex when the build goes red.
 const MAX_PAGE_JS_BYTES = 10 * 1024;
 
 class JsBudgetError extends Error {}

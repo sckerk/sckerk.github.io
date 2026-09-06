@@ -1,5 +1,12 @@
 <!doctype html>
-<html lang="en">
+{#- `no-js` is the no-JavaScript contract, and it is deliberately on the element the parser sees
+first. css/style.css reads it: with the class present the mobile nav is expanded and the toggle is
+display:none, so the links are reachable without scripting. js/nav-init.js, loaded synchronously
+below, removes it before first paint - which is what makes the collapsed header the *first* thing
+painted rather than a correction applied to it (YEO-143). Removing this class from the markup
+without also removing the `.no-js` rules in css/style.css ships a menu that only exists with
+JavaScript. -#}
+<html lang="en" class="no-js">
     <head>
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
@@ -111,6 +118,17 @@
             type="font/woff2"
             crossorigin
         />
+        {#- Render-blocking, and no `defer` - that is the entire point. It flips the header out of
+        its no-JS state before the browser paints, so nothing in the header moves afterwards; with
+        `defer` the collapse landed after first paint and cost CLS 0.363 on every page. It is an
+        external file rather than the usual inline anti-flicker script because the CSP above sets
+        `script-src 'self'` with no 'unsafe-inline', and loosening that to solve a layout problem
+        would trade a real security property for a cosmetic one. Ahead of the stylesheets on
+        purpose: a classic script cannot execute until every stylesheet before it has loaded, and
+        the preload scanner finds the two links below regardless of what sits above them. See
+        src/js/nav-init.js - it is one statement and must stay that way. #}
+        <script src="/js/nav-init.js"></script>
+
         <link rel="stylesheet" type="text/css" href="/css/global.css" />
         <link rel="stylesheet" type="text/css" href="/css/style.css" />
     </head>
@@ -139,17 +157,18 @@
             <p class="site-title">
                 <a href="/"><span lang="zh-Hant">郭 秀 洙</span> Siew Chu Kerk</a>
             </p>
-            {%- endif %} {# `hidden` is the no-JS contract, not a styling choice: js/nav.js removes
-            it and collapses the nav in the same step, so a visitor without JavaScript is left with
-            a permanently expanded menu instead of a button that cannot do anything. Never drop the
-            attribute here without also dropping the `.js-nav` gate in css/style.css. #}
+            {%- endif %} {# The toggle used to ship with the `hidden` attribute and js/nav.js
+            removed it. That reveal was itself post-paint: below 48rem the button's 44px minimum is
+            taller than the title's line box, so the header grew by ~19px the moment it appeared - a
+            second shift on top of the nav collapse. The button is therefore always in the markup
+            now, and `.no-js .nav-toggle { display: none }` in css/style.css is what hides it from a
+            visitor who has no script to act on the click. #}
             <button
                 type="button"
                 id="mobile-nav-button"
                 class="nav-toggle"
                 aria-expanded="false"
                 aria-controls="site-nav"
-                hidden
             >
                 <span class="line"></span>
                 <span class="line"></span>
