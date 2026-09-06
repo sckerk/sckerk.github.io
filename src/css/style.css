@@ -436,6 +436,17 @@ header nav a {
     height: 100%;
     scroll-snap-align: center;
 }
+/* The ARIA slide group (YEO-144). role="group" is not valid on an <li> and
+   displaced the listitem role that <ul role="list"> requires, so it moved off
+   the list item onto a wrapper of its own; scroll-snap-align stays on .slide
+   above. The wrapper stays invisible to the layout only by passing the item's
+   height straight through - .slide picture below resolves its height:100%
+   against this box, and an auto-height one would collapse the image to
+   nothing. Same treatment .carousel-slide picture gets, for the same reason. */
+.slide-group {
+    display: block;
+    height: 100%;
+}
 /* <picture> is display:inline by default, so it would build a line box and add
    descender space under every slide. */
 .slide picture,

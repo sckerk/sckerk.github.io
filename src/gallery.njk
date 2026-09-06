@@ -24,34 +24,42 @@ landmark. #}
         tabindex="0"
     >
         {# role="list" is redundant in theory, but list-style:none drops the implicit list role in
-        Safari/VoiceOver, and this list is how the number of works gets announced. #}
+        Safari/VoiceOver, and this list is how the number of works gets announced. That only holds
+        while the children still present as listitem, which is why the APG slide group sits in an
+        element of its own (YEO-144). It used to sit on the list item, where role="group" replaced
+        the implicit listitem role: the list was left with no valid children, axe failed
+        aria-allowed-role and aria-required-children, and the count this role="list" exists to
+        restore was never announced. The APG carousel pattern puts that role on a slide container,
+        not on a list item. Do not answer a future axe complaint here by deleting role="list" - that
+        silences the rule and loses the announcement with it. #}
         <ul class="slides" role="list">
             {%- for work in gallery.works %}
-            <li
-                class="slide"
-                id="{{ work.id }}"
-                role="group"
-                aria-roledescription="slide"
-                aria-label="Work {{ work.position }} of {{ gallery.works | length }}"
-            >
-                <picture>
-                    <source
-                        type="image/webp"
-                        srcset="{{ work.srcsetWebp }}"
-                        sizes="(min-width: 40rem) 610px, calc(100vw - 30px)"
-                    />
-                    <img
-                        src="{{ work.src }}"
-                        srcset="{{ work.srcsetJpeg }}"
-                        sizes="(min-width: 40rem) 610px, calc(100vw - 30px)"
-                        width="{{ work.width }}"
-                        height="{{ work.height }}"
-                        alt="{{ work.alt }}"
-                        loading="{{ 'eager' if loop.first else 'lazy' }}"
-                        fetchpriority="{{ 'high' if loop.first else 'auto' }}"
-                        decoding="async"
-                    />
-                </picture>
+            <li class="slide" id="{{ work.id }}">
+                <div
+                    class="slide-group"
+                    role="group"
+                    aria-roledescription="slide"
+                    aria-label="Work {{ work.position }} of {{ gallery.works | length }}"
+                >
+                    <picture>
+                        <source
+                            type="image/webp"
+                            srcset="{{ work.srcsetWebp }}"
+                            sizes="(min-width: 40rem) 610px, calc(100vw - 30px)"
+                        />
+                        <img
+                            src="{{ work.src }}"
+                            srcset="{{ work.srcsetJpeg }}"
+                            sizes="(min-width: 40rem) 610px, calc(100vw - 30px)"
+                            width="{{ work.width }}"
+                            height="{{ work.height }}"
+                            alt="{{ work.alt }}"
+                            loading="{{ 'eager' if loop.first else 'lazy' }}"
+                            fetchpriority="{{ 'high' if loop.first else 'auto' }}"
+                            decoding="async"
+                        />
+                    </picture>
+                </div>
             </li>
             {%- endfor %}
         </ul>

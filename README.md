@@ -204,8 +204,11 @@ set to, and why. Read it before changing a number. The performance and CLS
 floors have the longest history: they were loosened to `>= 0.80` and
 `<= 0.40` while the nav collapsed after first paint and shifted every page,
 and YEO-143 removed that shift and took them back to `>= 0.95` and
-`<= 0.05`. The `/gallery/` accessibility exception is still open and is
-written up under "KNOWN GAPS" in the same comment.
+`<= 0.05`. Accessibility, SEO and best practices all gate at 100 on every
+one of the five pages; `/gallery/` was the one exception, until YEO-144
+moved the carousel's `role="group"` off each `<li>` and onto a wrapper
+inside it. The only entry left under "KNOWN GAPS" in that comment is the
+missing branch ruleset.
 
 Note that a green Lighthouse accessibility score is not an accessibility
 audit. It catches roughly a third of real issues and cannot tell you

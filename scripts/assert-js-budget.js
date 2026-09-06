@@ -16,8 +16,8 @@
 // The number is the point of the modernization: the pre-Eleventy site loaded
 // Bootstrap 4.0.0-alpha.6, Tether, jQuery 1.11.2, jQuery 3.1.1 slim and jQuery
 // Cycle2 - roughly 120 KB before a byte of this site's own behaviour. What
-// replaced all of it is five hand-written files totalling ~11 KB on disk, of
-// which no single page loads more than three.
+// replaced all of it is six hand-written files totalling ~12 KB on disk, of
+// which no single page loads more than four.
 
 const fs = require("node:fs");
 const path = require("node:path");
