@@ -16,17 +16,17 @@
 // The number is the point of the modernization: the pre-Eleventy site loaded
 // Bootstrap 4.0.0-alpha.6, Tether, jQuery 1.11.2, jQuery 3.1.1 slim and jQuery
 // Cycle2 - roughly 120 KB before a byte of this site's own behaviour. What
-// replaced all of it is five hand-written files totalling ~11 KB on disk, of
-// which no single page loads more than three.
+// replaced all of it is six hand-written files totalling ~12 KB on disk, of
+// which no single page loads more than four.
 
 const fs = require("node:fs");
 const path = require("node:path");
 
 // 10 KB uncompressed per page. Measured worst case at the time of writing is
-// the homepage at 7,129 bytes (header.js + nav.js + carousel.js), so there is
-// ~3 KB of headroom - room for a genuinely new behaviour, nowhere near room for
-// a framework. Raising this should be a conscious decision with a reason in the
-// commit message, not a reflex when the build goes red.
+// the homepage at 7,927 bytes (nav-init.js + header.js + nav.js + carousel.js),
+// so there is ~2 KB of headroom - room for a genuinely new behaviour, nowhere
+// near room for a framework. Raising this should be a conscious decision with a
+// reason in the commit message, not a reflex when the build goes red.
 const MAX_PAGE_JS_BYTES = 10 * 1024;
 
 class JsBudgetError extends Error {}

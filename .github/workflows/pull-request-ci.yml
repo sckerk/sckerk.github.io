@@ -33,34 +33,59 @@
 #                                                                until YEO-144
 #                                                                fixed the slide
 #                                                                ARIA nesting.
-#   Performance       99-100 unshifted, 82 shifted    >= 0.80    Pinned to the
-#                                                                shifted mode; gap 1.
-#   CLS               0.000 unshifted, 0.363 shifted  <= 0.40    Pinned to the
-#                                                                shifted mode; gap 1.
-#   First-party JS    3,945 B transfer worst case     <= 6 KB    ~120 KB of jQuery
-#                     (7,129 B uncompressed)                     and Cycle2 was
+#   Performance       0.99 on /, 1.00 on the other    >= 0.95    Re-tightened by
+#                     four; median of three                       YEO-143.
+#   CLS               0.000 on all five pages, in     <= 0.05    Re-tightened by
+#                     15 runs of 15                              YEO-143.
+#   First-party JS    4,854 B transfer worst case     <= 6 KB    ~120 KB of jQuery
+#                     (7,927 B uncompressed)                     and Cycle2 was
 #                                                                deleted; this is
 #                                                                what stops it
 #                                                                coming back.
 #   Gallery images    313,409 B on /gallery/          <= 400 KB  ~86 KB of headroom.
 #
-# The performance and CLS numbers deserve their own warning, because getting them
-# wrong is how this file would have shipped a gate that fails at random.
+# The performance and CLS numbers carry the most history, and it is worth keeping,
+# because it is how this file nearly shipped a gate that failed at random.
 #
-# They were first set from a developer laptop, where the gap-1 layout shift below
-# appears in roughly one run in three: >= 0.95 and <= 0, asserted against the best
-# of the three runs rather than the median, on the reasoning that a real
-# regression would make every run miss. The first CI run passed and that looked
-# settled. The second failed - on a GitHub runner /gallery/ shifted in all three
-# runs, so best-of-three was still 0.82 and 0.363. The runner is slow enough that
-# the shift is not the exception there, it is the rule.
+# They were first set from a developer laptop: >= 0.95 and <= 0, asserted against
+# the best of three runs rather than the median. Both were then loosened to >= 0.80
+# and <= 0.40, because every page shifted by CLS 0.363 whenever js/nav.js executed
+# after first paint - the nav shipped expanded so a visitor without JavaScript got
+# a usable menu, and the deferred script then collapsed it, moving the content
+# down. On a laptop that happened in roughly one run in three, which is why
+# best-of-three passed the first CI run and failed the second; on a GitHub runner
+# it happened in 3 of 3, so the median was the shifted mode and the loose floors
+# were the only honest ones available.
 #
-# So the thresholds are now pinned just outside the *shifted* mode, measured on
-# the runner rather than on a laptop, and aggregated with the ordinary median.
-# They are floors, not targets: they catch a page that becomes catastrophically
-# slow, and they will not catch a page that regresses from 100 to 85. That is the
-# honest cost of leaving gap 1 open, and it is the reason gap 1 is worth fixing -
-# doing so should take these back to >= 0.95 and <= 0 on the median.
+# YEO-143 removed the shift rather than the gate. The no-JS contract is unchanged
+# and still lives in the markup (`class="no-js"` on <html>), but js/nav-init.js now
+# clears it synchronously from <head>, so the collapsed header is what gets painted
+# instead of a correction applied afterwards. Nothing in the header moves after
+# first paint, on any page, at any width. So these two are back where the first
+# attempt wanted them - measured on the runner this time, on the median of three,
+# with a small margin.
+#
+# The two runs, same runner and same config, are directly comparable:
+#
+#                     CLS median (all runs)          Performance median   FCP median
+#   ---------------   -----------------------------  ------------------   ----------
+#   /       before    0.363  (0.363, 0, 0.363)       0.82                 1384 ms
+#           after     0.000  (0, 0, 0)               0.99                 1383 ms
+#   /gallery/ before  0.363  (0.363, 0.363, 0.363)   0.82                 1387 ms
+#           after     0.000  (0, 0, 0)               1.00                 1386 ms
+#
+# /contact/ and /events/ were bimodal even on the runner - 0 median, but one run in
+# three at ~0.33 - which is what a gate on the median cannot see and is the reason
+# CLS is now asserted at 0.05 rather than left alone. After the change CLS is 0.000
+# in 15 runs of 15, across all five pages.
+#
+# FCP is the number to watch when reading this, because the fix adds a
+# render-blocking request to <head>. It did not move: 1382-1387 ms before,
+# 1383-1386 ms after. A 593-byte same-origin file on an already-open connection
+# costs nothing measurable, which is the entire premise of doing it this way.
+#
+# These are floors, not targets, but they are now close enough to the real numbers
+# to catch an ordinary regression rather than only a catastrophic one.
 #
 # The analytics beacon (static.cloudflareinsights.com) is blocked during audits.
 # It cannot work against a 127.0.0.1 origin - its POST to /cdn-cgi/rum fails CORS
@@ -87,19 +112,7 @@
 # because it is a CI change and they need [Web] changes of their own
 # ---------------------------------------------------------------------------
 #
-#   1. Every page shifts by CLS 0.363 whenever js/nav.js executes after first
-#      paint. The nav ships expanded so a visitor without JavaScript gets a usable
-#      menu; nav.js then adds `.js-nav` and CSS collapses it, which changes the
-#      header's height and pushes the page content down. On a fast run the script
-#      runs before paint and nothing shifts, which is why the metric is bimodal.
-#      Confirmed by blocking js/nav.js: CLS 0.000 and performance 100 in 4 runs of
-#      4, against 0.363 in 1 of 4 with it present on a laptop - and in 3 of 3 on a
-#      GitHub runner, which is the measurement that set the thresholds above. The
-#      fix is to reserve the collapsed header height, or set the initial state
-#      before paint; once it lands, raise performance back to >= 0.95 and CLS back
-#      to <= 0.
-#
-#   2. There is no branch ruleset requiring these checks, so a red run does not
+#   1. There is no branch ruleset requiring these checks, so a red run does not
 #      block a merge today. That is repo-settings work and cannot be done from
 #      here. Until it exists, every gate below is advisory.
 
