@@ -65,10 +65,13 @@ dd {
        case). 13 leaves ~8% of headroom on top of that. The subtracted pixels
        are everything on the row that is not title text: 20px of header padding
        plus 30px of the title's own padding, and, from 48rem up, the width the
-       nav shrink-wraps to. THAT LAST NUMBER TRACKS THE NAV'S CONTENTS - adding
-       a nav item to src/_data/site.json means re-measuring it. If it is ever
-       wrong the title wraps rather than overflows, which is visible in the
-       layout instead of silent. */
+       nav shrink-wraps to. THAT LAST NUMBER TRACKS THE NAV'S CONTENTS -
+       adding a route with `nav: true` to src/_data/routes.js, or renaming an
+       existing one, means re-measuring it. If it is ever wrong the title
+       wraps rather than overflows: measured with a fifth nav item and no
+       re-measure, the title wraps between roughly 768 and 888px but still
+       never overlaps content and never scrolls sideways. The failure is
+       visible in the layout instead of silent. */
     --title-fit-cap: calc((100vw - 94px) / 13);
     --site-title-size: clamp(1rem, min(0.558rem + 2.21vw, var(--title-fit-cap)), 3rem);
     /* 5/3 is exact: 48px x 5/3 = the 80px line box the desktop h1 has today. */
