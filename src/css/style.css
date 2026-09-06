@@ -50,11 +50,27 @@ dd {
     --nav-link-size: 0.875rem; /* 14px */
     --nav-link-padding: 1.875rem; /* 30px */
 
-    /* Continuous 16px -> 48px scale. It replaces the 48px desktop / 20px
-       mobile pair, which jumped between the two at a single pixel. 48px is
-       reached at 1234px and held from there up, so 1440px renders at exactly
-       the size it does today. */
-    --site-title-size: clamp(1rem, 0.3rem + 3.5vw, 3rem);
+    /* Continuous 16px -> 48px scale, replacing the 48px desktop / 20px mobile
+       pair that jumped between the two at a single pixel.
+
+       --title-fit-cap is what keeps the scale honest, and it is not
+       decoration: --header-height below assumes the title occupies exactly one
+       line, and a wrapped title silently makes the real header taller than the
+       number every content container clears it by. So the font size is capped
+       at the size that still fits on one line.
+
+       The 13 is the title's aspect: "郭 秀 洙 Siew Chu Kerk" in Orbitron
+       measures 11.97x its font-size (measured at 16/24/32/40/48px with the
+       webfont loaded; the fallback stack is narrower, so Orbitron is the worst
+       case). 13 leaves ~8% of headroom on top of that. The subtracted pixels
+       are everything on the row that is not title text: 20px of header padding
+       plus 30px of the title's own padding, and, from 48rem up, the width the
+       nav shrink-wraps to. THAT LAST NUMBER TRACKS THE NAV'S CONTENTS - adding
+       a nav item to src/_data/site.json means re-measuring it. If it is ever
+       wrong the title wraps rather than overflows, which is visible in the
+       layout instead of silent. */
+    --title-fit-cap: calc((100vw - 94px) / 13);
+    --site-title-size: clamp(1rem, min(0.558rem + 2.21vw, var(--title-fit-cap)), 3rem);
     /* 5/3 is exact: 48px x 5/3 = the 80px line box the desktop h1 has today. */
     --site-title-line: calc(var(--site-title-size) * 5 / 3);
 
@@ -235,13 +251,23 @@ header nav a {
     :root {
         /* From here up the nav shares row one with the title, so the header is
            as tall as whichever of the two is taller. A nav link's box is its
-           1.5 line box plus its padding, top and bottom. On desktop that is
-           81px against the title's 80px, which is the 101px header (padding
-           included) the site has today. */
+           1.5 line box plus its padding, top and bottom: 81px, against the
+           title's 80px at full size. That makes the header 101px including its
+           padding - the height it is today - and the nav, not the title, is
+           what sets it across this whole range. */
         --header-row: max(
             var(--site-title-line),
             calc(var(--nav-link-size) * 1.5 + 2 * var(--nav-link-padding))
         );
+
+        /* The nav is on the row now, so it comes out of the title's budget:
+           20px header padding + 30px title padding + the 381px the four nav
+           links shrink-wrap to. See --title-fit-cap above. */
+        --title-fit-cap: calc((100vw - 431px) / 13);
+        /* Second ramp, continuous with the first: both land on ~26px at 768px,
+           and this one reaches the 48px cap at 1234px, so 1440px renders at
+           exactly the size it does today. */
+        --site-title-size: clamp(1rem, min(4.74vw - 0.656rem, var(--title-fit-cap)), 3rem);
     }
 
     header {
@@ -252,10 +278,18 @@ header nav a {
         background: none;
     }
 
-    /* was Bootstrap's .col-md-6 breakpoint */
-    .site-title,
+    /* was Bootstrap's .col-md-6 breakpoint, which split the row 50/50. The nav
+       shrink-wraps instead and the title takes what is left, which is the same
+       pixels - the nav's items are right-aligned against the header's right
+       edge either way, and the title's text is left-aligned against its left
+       one - but it roughly doubles the width the title has to fit in before it
+       has to wrap. A 50% basis put the wrap point at 1189px, inside the range
+       where the scale is still growing. */
+    .site-title {
+        flex: 1 1 auto;
+    }
     header nav {
-        flex: 0 0 50%;
+        flex: 0 0 auto;
     }
 
     .nav-toggle {
