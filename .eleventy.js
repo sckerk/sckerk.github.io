@@ -6,6 +6,15 @@ module.exports = function (eleventyConfig) {
     eleventyConfig.addPassthroughCopy("src/css");
     eleventyConfig.addPassthroughCopy("src/js");
 
+    // Orbitron and Oswald as WOFF2, served from this origin. YEO-141 dropped the
+    // fonts.googleapis.com stylesheet and the fonts.gstatic.com font fetches it
+    // pulled in, which were the site's last third-party runtime origins. See
+    // src/fonts/README.md for provenance and the "Fonts" section of
+    // src/css/global.css for the @font-face block. Not to be confused with the
+    // ~800 KB of unreferenced FontAwesome webfonts that used to sit in a root
+    // fonts/ directory - YEO-136 deleted those, and no page ever used them.
+    eleventyConfig.addPassthroughCopy("src/fonts/*.woff2");
+
     // What ships as /img is *generated*, never committed: scripts/resize-images.mjs
     // reads the masters in originals/ and writes WebP + JPEG derivatives into
     // generated/img/ (gitignored), which `npm run build` does before Eleventy

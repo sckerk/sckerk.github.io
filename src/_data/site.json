@@ -10,5 +10,6 @@
         "width": 1200,
         "height": 630,
         "alt": "A dense cluster of ruffled, crocheted coral-like forms in bright red, their frilled edges trimmed in yellow, turquoise, green and pink."
-    }
+    },
+    "contentSecurityPolicy": "default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; connect-src 'self' https://cloudflareinsights.com; style-src 'self'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; frame-src 'none'; upgrade-insecure-requests"
 }

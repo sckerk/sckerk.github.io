@@ -5,6 +5,25 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
 
+        {# Content-Security-Policy, delivered as a meta tag because GitHub Pages serves static files
+        and cannot set response headers. It has to sit this early: a meta policy governs only the
+        resources the parser reaches after it. Two directives are IGNORED in meta form and are
+        therefore NOT in force here, whatever the policy below might imply to a reader: *
+        frame-ancestors - there is no clickjacking protection on this site. The header-only
+        X-Frame-Options is equally unavailable. Any page may frame these pages. Nothing here has a
+        form, a session or an authenticated state, so there is no action to trick a visitor into
+        taking, but the gap is real and should not be recorded as covered. * report-uri / report-to
+        - violations surface in the visitor's own console and reach us nowhere. Test pages with
+        devtools open; there is no report stream to check afterwards. Closing either needs response
+        headers, which needs a different host. That is a hosting decision (see the OUT OF SCOPE
+        section of YEO-141), not something this tag can do. The two Cloudflare origins are not
+        interchangeable: static.cloudflareinsights.com is where the analytics beacon is fetched
+        from, cloudflareinsights.com is where it POSTs to. Allowing only the first loads the beacon
+        and then drops every event, silently. The policy string itself lives in src/_data/site.json
+        because src/redirects.njk carries the same tag and does not use this layout - two
+        hand-maintained copies of a policy is exactly how one of them silently rots. #}
+        <meta http-equiv="Content-Security-Policy" content="{{ site.contentSecurityPolicy }}" />
+
         {#- Every search-facing string on this page is resolved here, once, from the route registry
         in src/_data/routes.js keyed by the page's own `key`. Nothing below is hand-typed per page,
         which is what stopped six pages sharing one generic title and five empty content="" tags.
@@ -67,13 +86,30 @@
         <script type="application/ld+json">
             {{ structuredData[key] | safe }}
         </script>
-        {%- endif %}
-
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        {%- endif %} {# Orbitron and Oswald are same-origin now (YEO-141 deleted the
+        fonts.googleapis.com stylesheet and the two preconnects that fed it), but a font referenced
+        only from inside a stylesheet is not discovered until that stylesheet has been fetched and
+        parsed - two round trips deep. These preloads are the faces that paint above the fold on
+        every page: Orbitron for the site title, Oswald for the body copy. Without them,
+        self-hosting is measurably *slower* on a cold cache than the CDN it replaced. crossorigin is
+        required even though these are same-origin. Fonts are always fetched in CORS mode, and a
+        preload whose mode does not match the real fetch does not satisfy it - the file is simply
+        downloaded twice. oswald-400-latin-ext.woff2 is deliberately not preloaded: its
+        unicode-range covers codepoints most pages never render, and preloading it would spend bytes
+        on nothing. #}
         <link
-            href="https://fonts.googleapis.com/css?family=Orbitron|Oswald&amp;display=swap"
-            rel="stylesheet"
+            rel="preload"
+            href="/fonts/orbitron-400-latin.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <link
+            rel="preload"
+            href="/fonts/oswald-400-latin.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
         />
         <link rel="stylesheet" type="text/css" href="/css/global.css" />
         <link rel="stylesheet" type="text/css" href="/css/style.css" />
@@ -130,6 +166,22 @@
         <script src="/js/header.js" defer></script>
         {%- for src in scripts %}
         <script src="{{ src }}" defer></script>
-        {%- endfor %}
+        {%- endfor %} {# Cloudflare Web Analytics. Cookieless and storing no personal data, so no
+        consent banner is required or wanted - adding one would be theatre. Copied verbatim from
+        YEO-141, token included; Cloudflare keys the dashboard on the token, not on a domain string,
+        so there is no data-domain to get wrong. type="module" already defers - do not add a defer
+        attribute and do not rewrite this as a classic script. No integrity attribute either:
+        Cloudflare revises beacon.min.js in place at a stable URL and publishes no hash, so any
+        value written here would be invented and would start failing the moment they ship a
+        revision. Nothing on the page depends on this loading. sckerk.com is DNS-only on Cloudflare
+        (grey cloud, settled in YEO-134), so the proxy will not inject the beacon for us - if this
+        tag goes, measurement silently stops. #}
+        <!-- Cloudflare Web Analytics -->
+        <script
+            type="module"
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            data-cf-beacon='{"token": "719e165a84d841b1b7f0f013c99e21ac"}'
+        ></script>
+        <!-- End Cloudflare Web Analytics -->
     </body>
 </html>
