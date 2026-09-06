@@ -174,10 +174,18 @@ Why it matters once it lands:
   ungrouped** so a breaking change always arrives as its own PR. GitHub
   Actions bumps are grouped into one PR, since the SHA pins would
   otherwise never move on their own.
-- **Known gap**: there is no branch ruleset requiring the `validate`
-  check, so a red CI run does not block merging today. Setting one up is
-  admin-gated and still outstanding — don't assume CI is enforcing
-  anything.
+- A branch ruleset named **`protect main`** is active on the default
+  branch. It blocks deletion and force-pushes, requires a pull request,
+  allows **squash merges only**, and requires **zero** approving reviews —
+  so nothing in this repo gates on a human or an agent approving a PR.
+- **Known gap**: that ruleset requires only the `validate` check. It was
+  created a day before YEO-142 added `lighthouse`, `html-validate` and
+  `links`, and was never updated, so **three of the four PR checks are
+  advisory**. A PR that regresses CLS, drops an accessibility score,
+  emits invalid HTML, or breaks a link goes red and merges anyway. Fixing
+  it means adding those three contexts to the existing ruleset, which is
+  admin-gated: the repo is owned by `sckerk` and the maintainer's own
+  account has push/triage but not admin.
 
 ## Linear workspace — read this before filing anything
 
