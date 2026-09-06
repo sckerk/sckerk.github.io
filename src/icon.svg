@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Kerk Siew Chu">
+  <title>Kerk Siew Chu</title>
+  <!--
+    The site's mark. Pure geometry, no text: a glyph-based icon would depend on a
+    CJK font being installed to render the 郭 character and would fall back to a
+    tofu box wherever one is not, which is most of the situations a favicon is
+    actually seen in. The form is a vessel with a mark above it, echoing the
+    cupped rims that recur through the ceramic works, in the site's own
+    black-and-white palette.
+
+    This file is the single source for every icon the site serves.
+    scripts/generate-icons.mjs rasterises it into apple-touch-icon.png and
+    favicon.ico; Eleventy passes it through unchanged as /favicon.svg. Editing
+    it here changes all three. It is full-bleed rather than padded because a
+    favicon is composited at 16px, where interior margin just costs pixels.
+  -->
+  <rect width="64" height="64" fill="#000" />
+  <rect x="7" y="14" width="50" height="7" fill="#fff" />
+  <path
+    d="M9 28 C9 47, 20 56, 32 56 C44 56, 55 47, 55 28 Z"
+    fill="#fff"
+  />
+  <path
+    d="M18 30 C18 42, 24 48.5, 32 48.5 C40 48.5, 46 42, 46 30 Z"
+    fill="#000"
+  />
+</svg>

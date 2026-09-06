@@ -766,12 +766,23 @@ header nav a {
     text-align: center;
 }
 
-.contact a {
+.contact a,
+.contact .email-fallback {
     display: block;
     color: black;
     /* was a flat 50px, which left only ~190px of line on a 320px screen. The
        24px floor still makes each link a ~65px tall target. */
     padding: clamp(1.5rem, 5vw, 50px);
+}
+
+/* The email link ships with no href (js/contact.js adds one on first hover,
+   focus or tap - see YEO-141), and an <a> without an href gets neither the
+   pointer cursor nor the underline the browser gives a real link. Both are
+   restored here so it looks and behaves like the Facebook link beside it from
+   the first frame, before any interaction has happened. */
+.contact .email-link {
+    cursor: pointer;
+    text-decoration: underline;
 }
 
 .events {

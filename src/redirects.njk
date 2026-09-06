@@ -1,0 +1,43 @@
+---
+pagination:
+    data: routes.redirects
+    size: 1
+    alias: route
+permalink: "{{ route.legacy }}"
+eleventyExcludeFromCollections: true
+---
+
+{#- One stub per `legacy` path in the route registry, emitted at the old URL. GitHub Pages serves
+static files only and cannot issue a real 301, so this is the closest available substitute: a
+canonical link naming the new URL (the signal search engines actually consolidate on) plus an
+instant meta refresh (what moves a human). The visible link is the fallback for anything that
+honours neither. noindex keeps the stub itself out of the index while `follow` still passes the
+canonical along. This is a compromise, not a 301 - preserving ranking perfectly would mean a host
+that can send real redirect status codes, which is a bigger decision than this ticket. These stubs
+and the directory-URL flip in the page front matter are one change and must never ship apart:
+without them every inbound link to /bio.html 404s the moment the flip lands. -#}
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        {#- Same policy as every other page, from the one copy in src/_data/site.json. This stub
+        loads no CSS, no JS and no images, so today the policy constrains nothing here - it is
+        carried so the answer to "is every served page covered" stays yes without a caveat, and so
+        anything added to this template later is covered by default rather than by memory.
+        frame-ancestors and report-uri are ignored in meta form here exactly as they are in the main
+        layout. -#}
+        <meta http-equiv="Content-Security-Policy" content="{{ site.contentSecurityPolicy }}" />
+        <title>Moved — {{ route.title }}</title>
+        <link rel="canonical" href="{{ site.origin }}{{ route.path }}" />
+        <meta http-equiv="refresh" content="0; url={{ route.path }}" />
+        <meta name="robots" content="noindex, follow" />
+        <meta name="description" content="{{ route.description }}" />
+    </head>
+    <body>
+        <p>
+            This page has moved to
+            <a href="{{ route.path }}">{{ site.origin }}{{ route.path }}</a>.
+        </p>
+    </body>
+</html>
