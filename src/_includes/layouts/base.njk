@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-        <meta name="viewport" content="width=device-width" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
 
         {# Content-Security-Policy, delivered as a meta tag because GitHub Pages serves static files
         and cannot set response headers. It has to sit this early: a meta policy governs only the
@@ -139,13 +139,17 @@
             <p class="site-title">
                 <a href="/"><span lang="zh-Hant">郭 秀 洙</span> Siew Chu Kerk</a>
             </p>
-            {%- endif %}
+            {%- endif %} {# `hidden` is the no-JS contract, not a styling choice: js/nav.js removes
+            it and collapses the nav in the same step, so a visitor without JavaScript is left with
+            a permanently expanded menu instead of a button that cannot do anything. Never drop the
+            attribute here without also dropping the `.js-nav` gate in css/style.css. #}
             <button
                 type="button"
                 id="mobile-nav-button"
                 class="nav-toggle"
                 aria-expanded="false"
                 aria-controls="site-nav"
+                hidden
             >
                 <span class="line"></span>
                 <span class="line"></span>
@@ -164,6 +168,7 @@
         </footer>
 
         <script src="/js/header.js" defer></script>
+        <script src="/js/nav.js" defer></script>
         {%- for src in scripts %}
         <script src="{{ src }}" defer></script>
         {%- endfor %} {# Cloudflare Web Analytics. Cookieless and storing no personal data, so no
