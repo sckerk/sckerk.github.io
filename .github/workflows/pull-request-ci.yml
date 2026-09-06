@@ -47,7 +47,7 @@
 # The performance and CLS numbers deserve their own warning, because getting them
 # wrong is how this file would have shipped a gate that fails at random.
 #
-# They were first set from a developer laptop, where the gap-2 layout shift below
+# They were first set from a developer laptop, where the gap-1 layout shift below
 # appears in roughly one run in three: >= 0.95 and <= 0, asserted against the best
 # of the three runs rather than the median, on the reasoning that a real
 # regression would make every run miss. The first CI run passed and that looked
@@ -59,7 +59,7 @@
 # the runner rather than on a laptop, and aggregated with the ordinary median.
 # They are floors, not targets: they catch a page that becomes catastrophically
 # slow, and they will not catch a page that regresses from 100 to 85. That is the
-# honest cost of leaving gap 2 open, and it is the reason gap 2 is worth fixing -
+# honest cost of leaving gap 1 open, and it is the reason gap 1 is worth fixing -
 # doing so should take these back to >= 0.95 and <= 0 on the median.
 #
 # The analytics beacon (static.cloudflareinsights.com) is blocked during audits.
