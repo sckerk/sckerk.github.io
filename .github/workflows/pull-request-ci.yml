@@ -32,11 +32,11 @@
 #   Accessibility     100 on four pages, 94 on        >= 1.00,   Gallery exception
 #                     /gallery/                       0.94 on    in gap 1 below.
 #                                                     gallery
-#   Performance       100 on all five pages           >= 0.95    Re-tightened by
-#                                                                YEO-143.
-#   CLS               0.000 on all five pages         <= 0.05    Re-tightened by
-#                                                                YEO-143.
-#   First-party JS    3,945 B transfer worst case     <= 6 KB    ~120 KB of jQuery
+#   Performance       0.99 on /, 1.00 on the other    >= 0.95    Re-tightened by
+#                     four; median of three                       YEO-143.
+#   CLS               0.000 on all five pages, in     <= 0.05    Re-tightened by
+#                     15 runs of 15                              YEO-143.
+#   First-party JS    4,854 B transfer worst case     <= 6 KB    ~120 KB of jQuery
 #                     (7,927 B uncompressed)                     and Cycle2 was
 #                                                                deleted; this is
 #                                                                what stops it
@@ -62,9 +62,29 @@
 # instead of a correction applied afterwards. Nothing in the header moves after
 # first paint, on any page, at any width. So these two are back where the first
 # attempt wanted them - measured on the runner this time, on the median of three,
-# with a small margin: exactly 0 CLS gated at <= 0.05, and 100 performance gated at
-# >= 0.95. They are floors, not targets, but they are now close enough to the real
-# numbers to catch an ordinary regression rather than only a catastrophic one.
+# with a small margin.
+#
+# The two runs, same runner and same config, are directly comparable:
+#
+#                     CLS median (all runs)          Performance median   FCP median
+#   ---------------   -----------------------------  ------------------   ----------
+#   /       before    0.363  (0.363, 0, 0.363)       0.82                 1384 ms
+#           after     0.000  (0, 0, 0)               0.99                 1383 ms
+#   /gallery/ before  0.363  (0.363, 0.363, 0.363)   0.82                 1387 ms
+#           after     0.000  (0, 0, 0)               1.00                 1386 ms
+#
+# /contact/ and /events/ were bimodal even on the runner - 0 median, but one run in
+# three at ~0.33 - which is what a gate on the median cannot see and is the reason
+# CLS is now asserted at 0.05 rather than left alone. After the change CLS is 0.000
+# in 15 runs of 15, across all five pages.
+#
+# FCP is the number to watch when reading this, because the fix adds a
+# render-blocking request to <head>. It did not move: 1382-1387 ms before,
+# 1383-1386 ms after. A ~800-byte same-origin file on an already-open connection
+# costs nothing measurable, which is the entire premise of doing it this way.
+#
+# These are floors, not targets, but they are now close enough to the real numbers
+# to catch an ordinary regression rather than only a catastrophic one.
 #
 # The analytics beacon (static.cloudflareinsights.com) is blocked during audits.
 # It cannot work against a 127.0.0.1 origin - its POST to /cdn-cgi/rum fails CORS
