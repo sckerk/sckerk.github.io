@@ -1,0 +1,44 @@
+# Shared configuration for the link-checking gate in
+# .github/workflows/pull-request-ci.yml. Both lychee invocations read this file;
+# what differs between them is on the command line, because the split is the
+# whole point of the gate:
+#
+#   * The INTERNAL pass runs --offline and BLOCKS the PR. Every link it checks
+#     resolves against the built _site/ on disk, so it is deterministic and has
+#     no excuse to flake. This is the pass that catches the class of bug that
+#     shipped before the migration: gallery.html mixed root-absolute /img/... with
+#     relative img/..., and both only resolved by the accident of this being a
+#     user site served from the domain root.
+#
+#   * The EXTERNAL pass checks http(s) links and is ADVISORY. The bio cites a TED
+#     article and journal issues and the contact page links to Facebook, which
+#     routinely refuses CI user agents. Their uptime is not this repo's problem
+#     and a red PR check that nobody can fix is a check people learn to ignore.
+#
+# Verified against lychee 0.24.2.
+
+# Absolute URLs on this site (canonical links, og:url, the sitemap) point at
+# https://sckerk.com. The internal pass excludes them along with every other
+# remote link because it runs --offline; the external pass does check them, which
+# is deliberate - it is the one place CI notices that production stopped
+# answering - but advisory, for the same reason as every other network check.
+
+cache = true
+# One day. Long enough that a PR with several pushes re-checks nothing, short
+# enough that a link that broke last week is not reported OK for a fortnight.
+max_cache_age = "1d"
+
+# 403 and 429 are the two codes that mean "your request was refused because of
+# who you are, not because the page is gone" - bot filtering and rate limiting.
+# Treating them as OK keeps the external pass's log readable enough to be worth
+# reading. 404 and 410 still report.
+accept = ["200..=204", "403", "429"]
+
+# A browser-shaped agent gets past a good deal of naive bot filtering. Sites that
+# refuse it anyway land on `accept` above.
+user_agent = "Mozilla/5.0 (compatible; lychee; +https://sckerk.com)"
+
+max_retries = 2
+timeout = 20
+max_concurrency = 8
+no_progress = true
