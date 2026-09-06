@@ -53,9 +53,21 @@ const COMPRESSIBLE = new Set([".html", ".css", ".js", ".json", ".xml", ".txt", "
 const MIN_COMPRESS_BYTES = 1024;
 
 function resolvePath(urlPath) {
+    // decodeURIComponent throws URIError on a malformed percent-escape - a bare
+    // `GET /%E0%A4%A` is enough. Unguarded, that throw escapes the request
+    // handler and takes the whole process down, so the Lighthouse job's next
+    // request gets a connection reset and the run fails as "no pages audited"
+    // rather than as the bad URL it was. Treated as not-found, like any other
+    // path that does not name a file.
+    let decoded;
+    try {
+        decoded = decodeURIComponent(urlPath.split("?")[0]);
+    } catch {
+        return null;
+    }
+
     // normalize() collapses ".." before the prefix check, so a request for
     // /../../etc/passwd cannot escape the root.
-    const decoded = decodeURIComponent(urlPath.split("?")[0]);
     const candidate = normalize(join(root, decoded));
     if (candidate !== root && !candidate.startsWith(root + sep)) return null;
     // Directory URLs are how this site serves every page (/bio/, /gallery/) -
