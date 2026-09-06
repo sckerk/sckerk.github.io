@@ -5,3 +5,8 @@ generated/
 .claude-surf-meta.json
 .claude-surf-review.md
 .claude-surf-status.json
+
+# Link-checker cache (lychee.toml sets cache = true) and Lighthouse CI's report
+# directory. Both are per-run artefacts of the YEO-142 quality gates.
+.lycheecache
+.lighthouseci/

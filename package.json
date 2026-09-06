@@ -10,10 +10,13 @@
         "build": "npm run resize-images && npm run generate-icons && eleventy",
         "resize-images": "node scripts/resize-images.mjs",
         "generate-icons": "node scripts/generate-icons.mjs",
-        "lint": "prettier --check ."
+        "lint": "prettier --check .",
+        "validate:html": "html-validate \"_site/**/*.html\"",
+        "serve": "node scripts/serve-site.mjs _site 8080"
     },
     "devDependencies": {
         "@11ty/eleventy": "3.1.6",
+        "html-validate": "11.0.0",
         "prettier": "3.9.6",
         "sharp": "0.35.4"
     }

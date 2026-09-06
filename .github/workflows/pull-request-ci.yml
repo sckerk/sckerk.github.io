@@ -1,3 +1,115 @@
+# Pull Request CI
+#
+# `validate` lints and builds; three gates then run in parallel against the real
+# _site/ output it produced. They exist because every one of them corresponds to
+# a defect that actually shipped on this site, not to a hypothetical:
+#
+#   * HTML validation would have caught <li> as a direct child of <nav> on all
+#     six pre-Eleventy pages, and `height: 100vh%` - an invalid declaration every
+#     browser silently discarded.
+#   * Link checking would have caught gallery.html mixing root-absolute /img/...
+#     (30 times) with relative img/... (3 times), which resolved only by the
+#     accident of this being a user site served from the domain root.
+#   * The Lighthouse budget is what stops the SEO and accessibility work decaying.
+#     Six pages sharing one <title> and four empty Open Graph tags is a state you
+#     reach one un-reviewed commit at a time.
+#
+# ---------------------------------------------------------------------------
+# BUDGETS, AND WHERE THE NUMBERS CAME FROM
+# ---------------------------------------------------------------------------
+#
+# Every threshold in lighthouserc.json was measured, not chosen. Baseline: the
+# built site served locally by scripts/serve-site.mjs, Lighthouse 12 under mobile
+# emulation, three or more runs per page, across all five real pages. A threshold
+# set from aspiration is either a no-op or permanently red, and a gate that fails
+# at random gets switched off within a fortnight.
+#
+#   Category          Measured                        Gate       Note
+#   ----------------  ------------------------------  ---------  -----------------
+#   SEO               100 on all five pages           >= 1.00    Holds the level
+#                                                                YEO-139 reached.
+#   Best practices    100 on all five pages           >= 1.00    Stable.
+#   Accessibility     100 on four pages, 94 on        >= 1.00,   Gallery exception
+#                     /gallery/                       0.94 on    in gap 1 below.
+#                                                     gallery
+#   Performance       99-100 unshifted, 82 shifted    >= 0.80    Pinned to the
+#                                                                shifted mode; gap 2.
+#   CLS               0.000 unshifted, 0.363 shifted  <= 0.40    Pinned to the
+#                                                                shifted mode; gap 2.
+#   First-party JS    3,945 B transfer worst case     <= 6 KB    ~120 KB of jQuery
+#                     (7,129 B uncompressed)                     and Cycle2 was
+#                                                                deleted; this is
+#                                                                what stops it
+#                                                                coming back.
+#   Gallery images    313,409 B on /gallery/          <= 400 KB  ~86 KB of headroom.
+#
+# The performance and CLS numbers deserve their own warning, because getting them
+# wrong is how this file would have shipped a gate that fails at random.
+#
+# They were first set from a developer laptop, where the gap-2 layout shift below
+# appears in roughly one run in three: >= 0.95 and <= 0, asserted against the best
+# of the three runs rather than the median, on the reasoning that a real
+# regression would make every run miss. The first CI run passed and that looked
+# settled. The second failed - on a GitHub runner /gallery/ shifted in all three
+# runs, so best-of-three was still 0.82 and 0.363. The runner is slow enough that
+# the shift is not the exception there, it is the rule.
+#
+# So the thresholds are now pinned just outside the *shifted* mode, measured on
+# the runner rather than on a laptop, and aggregated with the ordinary median.
+# They are floors, not targets: they catch a page that becomes catastrophically
+# slow, and they will not catch a page that regresses from 100 to 85. That is the
+# honest cost of leaving gap 2 open, and it is the reason gap 2 is worth fixing -
+# doing so should take these back to >= 0.95 and <= 0 on the median.
+#
+# The analytics beacon (static.cloudflareinsights.com) is blocked during audits.
+# It cannot work against a 127.0.0.1 origin - its POST to /cdn-cgi/rum fails CORS
+# and logs a console error, costing 4 points of Best Practices for a reason that
+# does not exist in production - and its ~10 KB would otherwise sit inside a
+# JavaScript budget meant to measure this repo's own code.
+#
+# Only the five real pages are audited. The four redirect stubs at the old .html
+# paths are `noindex` meta-refresh documents with no content; scoring them would
+# produce meaningless numbers and an SEO score that can never reach 1.00.
+#
+# ---------------------------------------------------------------------------
+# WHAT A GREEN CHECK HERE DOES NOT MEAN
+# ---------------------------------------------------------------------------
+#
+# Lighthouse's accessibility score is an automated subset. It catches on the order
+# of a third of real accessibility problems and cannot judge whether alt text is
+# accurate, whether focus order makes sense, or whether a page is usable with a
+# screen reader. This gate prevents regression against a measured floor. It does
+# not replace the manual pass in YEO-140, and 100 here is not an audit.
+#
+# ---------------------------------------------------------------------------
+# KNOWN GAPS - real defects this workflow measures but deliberately does not fix,
+# because it is a CI change and they need [Web] changes of their own
+# ---------------------------------------------------------------------------
+#
+#   1. /gallery/ scores 94 on accessibility, so its gate is 0.94 rather than 1.00.
+#      Two axe rules fail, both from the carousel markup: `<li class="slide"
+#      role="group">` inside `<ul role="list">` trips aria-allowed-role (group is
+#      not an allowed role on <li>) and aria-required-children (the group role
+#      displaces the listitem role the list requires). The 0.94 is a floor to stop
+#      it getting worse, not an endorsement - raise it to 1.00 in the same PR that
+#      fixes the markup.
+#
+#   2. Every page shifts by CLS 0.363 whenever js/nav.js executes after first
+#      paint. The nav ships expanded so a visitor without JavaScript gets a usable
+#      menu; nav.js then adds `.js-nav` and CSS collapses it, which changes the
+#      header's height and pushes the page content down. On a fast run the script
+#      runs before paint and nothing shifts, which is why the metric is bimodal.
+#      Confirmed by blocking js/nav.js: CLS 0.000 and performance 100 in 4 runs of
+#      4, against 0.363 in 1 of 4 with it present on a laptop - and in 3 of 3 on a
+#      GitHub runner, which is the measurement that set the thresholds above. The
+#      fix is to reserve the collapsed header height, or set the initial state
+#      before paint; once it lands, raise performance back to >= 0.95 and CLS back
+#      to <= 0.
+#
+#   3. There is no branch ruleset requiring these checks, so a red run does not
+#      block a merge today. That is repo-settings work and cannot be done from
+#      here. Until it exists, every gate below is advisory.
+
 name: Pull Request CI
 
 on:
@@ -30,5 +142,148 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      # Also runs the three build-time guards wired into .eleventy.js's
+      # eleventy.after hook - assert-seo, assert-js-budget and assert-nav-fit -
+      # each of which fails the build directly. None needs a browser or a network,
+      # so they fire on a local `npm run build` too, before a push.
       - name: Build site
         run: npm run build
+
+      # The three gates below audit the same bytes rather than each running their
+      # own build. Besides being faster, it means they cannot disagree about what
+      # they were looking at.
+      - name: Upload built site
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: site
+          path: _site
+          retention-days: 1
+          # _site/.nojekyll is a hidden file and is excluded by default. Nothing
+          # below reads it, but an artifact that is not the build is a trap for
+          # whoever reuses it next.
+          include-hidden-files: true
+
+  lighthouse:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      # For lighthouserc.json and scripts/serve-site.mjs. No npm ci - the server
+      # is dependency-free Node and the action installs its own lhci.
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Download built site
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: site
+          path: _site
+
+      # Lighthouse needs HTTP, not file://. The wait is not optional: starting the
+      # server and auditing in the same breath is a race, and losing it produces
+      # "no pages audited" rather than anything that names the cause. Locally the
+      # first requests after `node scripts/serve-site.mjs` were refused before the
+      # listener came up, which is exactly the failure this loop removes.
+      - name: Serve built site
+        run: |
+          nohup node scripts/serve-site.mjs _site 8080 > /tmp/serve-site.log 2>&1 &
+          timeout 60 bash -c 'until curl -sf -o /dev/null http://127.0.0.1:8080/; do sleep 0.25; done'
+          cat /tmp/serve-site.log
+
+      - name: Lighthouse CI
+        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # 12.6.2
+        with:
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: false
+
+  html-validate:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download built site
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: site
+          path: _site
+
+      # Output only. Pointing a validator at src/ produces a wall of errors about
+      # Nunjucks syntax and says nothing about what visitors receive. The config,
+      # and the reason behind each disabled rule, is in .htmlvalidate.js.
+      - name: Validate HTML
+        run: npm run validate:html
+
+  links:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Download built site
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: site
+          path: _site
+
+      - name: Restore lychee cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .lycheecache
+          key: lychee-${{ github.sha }}
+          restore-keys: lychee-
+
+      # BLOCKING. --offline resolves every link against the built _site/ on disk,
+      # so it touches no network and has no excuse to flake. --root-dir is what
+      # makes root-absolute hrefs like /img/0-400.webp resolvable at all; without
+      # it lychee reports every one of them as unresolvable instead of checking
+      # it. --include-fragments additionally verifies that "Skip to content"
+      # (href="#main") and the carousel's no-JS href="#slide-N" controls name
+      # elements that exist.
+      #
+      # The redirect stubs at /gallery.html and friends carry an intentional
+      # <meta http-equiv="refresh">. lychee does not extract a meta refresh as a
+      # link, so it is not reported as broken; the visible <a> fallback inside
+      # each stub is checked normally and resolves.
+      - name: Check internal links (blocking)
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --offline
+            --include-fragments
+            --root-dir ${{ github.workspace }}/_site
+            "_site/**/*.html"
+          fail: true
+          jobSummary: false
+
+      # ADVISORY. The bio cites a TED article and journal issues; the contact page
+      # links to Facebook, which routinely refuses CI user agents. None of that is
+      # this repo's to fix, and a permanently red check is one nobody reads. 403
+      # and 429 are accepted outright in lychee.toml. Failures are still printed
+      # and land in the job summary - visible, not blocking.
+      - name: Check external links (advisory)
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --scheme http
+            --scheme https
+            --root-dir ${{ github.workspace }}/_site
+            "_site/**/*.html"
+          fail: false
+          jobSummary: true

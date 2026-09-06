@@ -126,6 +126,20 @@ says `/bio` where the sitemap says `/bio/` looks fine in a browser and is
 invisible until rankings move months later. Fix whichever side is wrong;
 do not relax the check.
 
+Two more guards run from the same hook and fail the build the same way:
+
+- `scripts/assert-js-budget.js` — no page may load more than 10 KB of
+  uncompressed first-party JavaScript. The worst page today is the
+  homepage at 7,129 bytes. This is what stops the ~120 KB of jQuery,
+  Tether, Bootstrap and Cycle2 that the migration deleted from returning.
+- `scripts/assert-nav-fit.js` — a staleness tripwire for the hand-measured
+  `431px` in `src/css/style.css`. It does not measure anything; it pins
+  the inputs that measurement was taken from (the four nav labels and the
+  nav's font size and padding) and fails with a "re-measure" message when
+  one of them moves. Read the file's header before changing the constant.
+
+Both run on a plain local `npm run build`, with no browser and no network.
+
 ### Icons and the share image
 
 `src/icon.svg` is the single source for the site mark.
@@ -159,9 +173,48 @@ settings. There is no `CNAME` file in this repo — the custom domain
 (`sckerk.com`) is configured in the repo's Pages settings, not in source.
 
 Every pull request into `main` runs
-`.github/workflows/pull-request-ci.yml` (job name `validate`), which
-installs, lints, and builds the site the same way CI will build it for
-deploy.
+`.github/workflows/pull-request-ci.yml`. The `validate` job installs,
+lints, and builds the site the same way CI will build it for deploy, then
+uploads `_site/` so the quality gates below all audit the same bytes.
+
+### Quality gates
+
+Three jobs run in parallel after `validate`, against the built output:
+
+- **`lighthouse`** — Lighthouse 12 under mobile emulation, three runs per
+  page, median, against `_site/` served locally by
+  `scripts/serve-site.mjs`. Thresholds live in `lighthouserc.json` and
+  cover the four categories plus JavaScript weight, gallery image weight
+  and CLS. Only the five real pages are audited; the redirect stubs are
+  `noindex` meta-refresh documents and would score meaninglessly.
+- **`html-validate`** — `npm run validate:html` over every file in
+  `_site/`. Configuration and the reason behind each disabled rule are in
+  `.htmlvalidate.js`. It runs on output, never on the `.njk` templates,
+  which are not valid HTML on their own.
+- **`links`** — `lychee`, twice. Internal links are checked offline
+  against the files on disk and **block** the PR; external links are
+  checked over the network and are **advisory**, because the bio cites a
+  TED article and journal issues and the contact page links to Facebook,
+  which refuses CI user agents. Shared settings are in `lychee.toml`.
+
+Every threshold was measured on the finished site rather than guessed, and
+the workflow's header comment records what was measured, what the gate was
+set to, and why. Read it before changing a number — in particular the
+performance and CLS floors, which are deliberately loose. A real layout
+shift (the nav collapsing once `js/nav.js` runs) makes both metrics
+bimodal, and on a CI runner the shifted mode is the common one, so those
+two gates are pinned just outside it and catch only catastrophic
+regressions. Fixing the shift is what allows them to be tightened. That
+gap and the `/gallery/` accessibility exception are both written up under
+"KNOWN GAPS" in the same comment.
+
+Note that a green Lighthouse accessibility score is not an accessibility
+audit. It catches roughly a third of real issues and cannot tell you
+whether alt text is accurate or whether focus order makes sense.
+
+**There is no branch ruleset requiring these checks**, so a red run does
+not block a merge today. Until one is configured in repo settings, the
+gates are advisory.
 
 ## Hosting
 

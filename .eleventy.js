@@ -1,4 +1,6 @@
 const assertSeo = require("./scripts/assert-seo.js");
+const assertJsBudget = require("./scripts/assert-js-budget.js");
+const assertNavFit = require("./scripts/assert-nav-fit.js");
 
 module.exports = function (eleventyConfig) {
     // Stylesheets and scripts live under src/ and are copied verbatim; the
@@ -74,8 +76,19 @@ module.exports = function (eleventyConfig) {
     // one reason: a check that has to be remembered is a check that eventually
     // is not run. Wiring it to the build makes it impossible to ship output it
     // has not seen. See scripts/assert-seo.js for what it actually compares.
+    //
+    // assert-js-budget.js and assert-nav-fit.js (YEO-142) hang off the same hook
+    // for the same reason. The three are independent - one guards metadata
+    // agreement, one guards JavaScript weight, one guards a hand-measured layout
+    // constant - but they share the property that makes this the right place:
+    // each is cheap, each reads the build rather than the intent behind it, and
+    // each fails the build rather than filing a report nobody opens. Between them
+    // they are also the part of PR CI that needs no browser and no network, so a
+    // local `npm run build` catches these before a push.
     eleventyConfig.on("eleventy.after", async ({ dir }) => {
         await assertSeo(dir.output);
+        assertJsBudget(dir.output);
+        assertNavFit();
     });
 
     return {
