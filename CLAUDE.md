@@ -178,14 +178,18 @@ Why it matters once it lands:
   branch. It blocks deletion and force-pushes, requires a pull request,
   allows **squash merges only**, and requires **zero** approving reviews —
   so nothing in this repo gates on a human or an agent approving a PR.
-- **Known gap**: that ruleset requires only the `validate` check. It was
-  created a day before YEO-142 added `lighthouse`, `html-validate` and
-  `links`, and was never updated, so **three of the four PR checks are
-  advisory**. A PR that regresses CLS, drops an accessibility score,
-  emits invalid HTML, or breaks a link goes red and merges anyway. Fixing
-  it means adding those three contexts to the existing ruleset, which is
-  admin-gated: the repo is owned by `sckerk` and the maintainer's own
-  account has push/triage but not admin.
+  **All four PR checks are required** — `validate`, `lighthouse`,
+  `html-validate` and `links` — so a red run blocks the merge and the
+  thresholds in `lighthouserc.json` are enforced gates, not just
+  measurements. Between YEO-142 and 2026-09-06 only `validate` was
+  required; don't trust older notes saying the other three are advisory.
+- Editing that ruleset is **admin-gated**: the repo is owned by `sckerk`
+  and the maintainer's account has push/triage but not admin, so a
+  ruleset write returns a 404 masking the permission denial. Ask the
+  owner rather than switching `gh` accounts.
+- Because zero approving reviews are required, **nothing gates on
+  review** — a PR can be opened and merged by the same account. An
+  agent's own "approval" is a record, not a gate.
 
 ## Linear workspace — read this before filing anything
 
