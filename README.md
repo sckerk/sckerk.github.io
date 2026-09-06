@@ -205,8 +205,10 @@ shift (the nav collapsing once `js/nav.js` runs) makes both metrics
 bimodal, and on a CI runner the shifted mode is the common one, so those
 two gates are pinned just outside it and catch only catastrophic
 regressions. Fixing the shift is what allows them to be tightened. That
-gap and the `/gallery/` accessibility exception are both written up under
-"KNOWN GAPS" in the same comment.
+gap is written up under "KNOWN GAPS" in the same comment. Accessibility,
+SEO and best practices all gate at 100 on every one of the five pages;
+`/gallery/` was the one exception, until YEO-144 moved the carousel's
+`role="group"` off each `<li>` and onto a wrapper inside it.
 
 Note that a green Lighthouse accessibility score is not an accessibility
 audit. It catches roughly a third of real issues and cannot tell you
