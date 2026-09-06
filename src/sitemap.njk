@@ -1,0 +1,17 @@
+---
+permalink: /sitemap.xml
+eleventyExcludeFromCollections: true
+---
+
+{#- Generated from src/_data/routes.js, never hand-maintained: a sitemap edited by hand is a sitemap
+that silently stops matching the site. scripts/assert-seo.js reads this file back out of _site/
+after the build and fails if its loc list is not exactly the registry's paths, prefixed with
+site.origin. No lastmod element: there is no honest per-page modification date to put in one - the
+git mtime of a template is not when the artist's biography changed - and a wrong lastmod is treated
+as a reason to crawl less, not more. Same reasoning for changefreq and priority, both of which
+Google ignores. -#} <?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    {%- for route in routes.sitemap %}
+    <url><loc>{{ site.origin }}{{ route.path }}</loc></url>
+    {%- endfor %}
+</urlset>

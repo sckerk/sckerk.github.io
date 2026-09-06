@@ -1,20 +1,14 @@
 {
-    "title": "Siew Chu Kerk",
-    "description": "",
+    "title": "Kerk Siew Chu",
+    "description": "Malaysian-born artist living and working in New York. Painting, sculpture and digital work on the cycle of life, adaptation, reason and intuition.",
     "origin": "https://sckerk.com",
+    "locale": "en_US",
     "authors": ["Max Yeo", "Alyssa Yeo"],
     "themeColor": "#FFF",
-    "pages": [
-        { "key": "home", "url": "/index.html", "label": "Home", "nav": false, "sitemap": true },
-        { "key": "works", "url": "/gallery.html", "label": "Works", "nav": true, "sitemap": true },
-        { "key": "events", "url": "/events.html", "label": "Events", "nav": true, "sitemap": true },
-        { "key": "bio", "url": "/bio.html", "label": "Bio", "nav": true, "sitemap": true },
-        {
-            "key": "contact",
-            "url": "/contact.html",
-            "label": "Contact",
-            "nav": true,
-            "sitemap": true
-        }
-    ]
+    "ogImage": {
+        "path": "/og-image.jpg",
+        "width": 1200,
+        "height": 630,
+        "alt": "A dense cluster of ruffled, crocheted coral-like forms in bright red, their frilled edges trimmed in yellow, turquoise, green and pink."
+    }
 }

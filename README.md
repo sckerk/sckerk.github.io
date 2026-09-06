@@ -36,9 +36,12 @@ live reload at http://localhost:8080.
 npm run build
 ```
 
-Two steps: `npm run resize-images` regenerates `generated/img/` from the
-masters in `originals/`, then Eleventy renders `src/` into `_site/`. That
-is exactly what CI runs, so a green local build is a real predictor.
+Three steps: `npm run resize-images` regenerates `generated/img/` from the
+masters in `originals/`, `npm run generate-icons` regenerates
+`generated/site/` (the favicons and the Open Graph share image), then
+Eleventy renders `src/` into `_site/` and runs the SEO assertions over the
+result. That is exactly what CI runs, so a green local build is a real
+predictor.
 
 ```
 npm run lint
@@ -83,6 +86,66 @@ has empty or duplicated alt text, or belongs to no set. Alt text is the only
 description these works have — there are no titles, dates or media on
 record — so it is written by a person looking at the image, never generated
 and never defaulted to a placeholder.
+
+## URLs and SEO
+
+Every real URL the site serves is declared once, in **`src/_data/routes.js`**.
+That one file supplies the nav links, each page's `<title>`, meta
+description, canonical link and Open Graph/Twitter tags, the `sitemap.xml`
+entries, and the redirect stubs. Nothing about a route is typed twice, and
+adding a page means adding a row there.
+
+Pages are served at directory URLs — `/gallery/`, `/bio/`, `/events/`,
+`/contact/` — with `/` for the homepage. The pre-Eleventy `.html` URLs
+(`/bio.html` and friends) still resolve: `src/redirects.njk` emits a small
+stub at each one carrying a canonical link to the new URL, an instant meta
+refresh, and a visible fallback link. GitHub Pages serves static files only
+and cannot issue a real 301, so this is the closest available substitute.
+The stubs and the directory URLs are a single change and must never be
+separated — without the stubs, every inbound link to an old URL 404s.
+
+`gallery1.html` and `header.html` were dead files and deliberately 404.
+
+### The build assertion
+
+`npm run build` fails if the built site and the route registry disagree.
+After Eleventy finishes, `scripts/assert-seo.js` reads `_site/` back off
+disk and checks that:
+
+- `sitemap.xml` lists exactly the registry's routes, absolute, and no others
+- each page's canonical link and `og:url` match its registry path exactly,
+  trailing slash included
+- a redirect stub exists at every legacy path and points at the right route
+- no page ships an empty `content=""` or `href=""`, an empty `<title>`, a
+  missing canonical, or a missing `lang`
+- `robots.txt` names the sitemap
+- the share image is really the size `site.json` advertises
+
+This is the part worth keeping. SEO breakage is silent — a canonical that
+says `/bio` where the sitemap says `/bio/` looks fine in a browser and is
+invisible until rankings move months later. Fix whichever side is wrong;
+do not relax the check.
+
+### Icons and the share image
+
+`src/icon.svg` is the single source for the site mark.
+`scripts/generate-icons.mjs` rasterises it into `favicon.ico` and
+`apple-touch-icon.png`, and crops `originals/0.jpg` into the 1200×630
+`og-image.jpg`; Eleventy passes the SVG itself through as `/favicon.svg`.
+None of the four are committed — they are build output under
+`generated/site/`, like the image derivatives. Edit the SVG and all three
+icons follow.
+
+### Structured data
+
+JSON-LD only, and only two types: `WebSite` on `/` and `Person` on `/bio/`,
+both in `src/_data/structuredData.js`, every field copied from the bio and
+contact pages.
+
+There is deliberately **no `VisualArtwork` markup**, and none should be
+added. It is only worth emitting with a medium, surface or date, and no
+per-work metadata exists for any of the 33 works — inventing one to satisfy
+a schema would be publishing a false claim about someone's art.
 
 ## Deploy
 
