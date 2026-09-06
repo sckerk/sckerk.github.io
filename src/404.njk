@@ -1,0 +1,27 @@
+---
+layout: layouts/base.njk
+permalink: /404.html
+title: Page not found — Kerk Siew Chu
+description: That page is not here. Browse the works, the biography and the exhibition history of the artist Kerk Siew Chu instead.
+noindex: true
+---
+
+{# GitHub Pages serves /404.html for any unmatched path automatically, with a real 404 status - no
+configuration needed, the filename is the contract. It goes through the normal layout so a visitor
+who lands here keeps the header, the nav and the footer, and has somewhere to go. It carries no
+entry in the route registry on purpose: it is not a real route, so it must not appear in the
+sitemap, and the layout's noindex flag keeps it out of the index. Its title and description come
+from front matter, which is the fallback branch the layout provides for exactly this page. #}
+
+<div class="page">
+    <h1>Page not found</h1>
+    <p>
+        The page you asked for is not here. It may have moved, or the link that brought you here may
+        be out of date.
+    </p>
+    <p>
+        <a href="{{ routes.byKey.works.path }}">Browse the works</a>, read the
+        <a href="{{ routes.byKey.bio.path }}">biography</a>, or
+        <a href="{{ routes.byKey.contact.path }}">get in touch</a>.
+    </p>
+</div>

@@ -1,3 +1,5 @@
+const assertSeo = require("./scripts/assert-seo.js");
+
 module.exports = function (eleventyConfig) {
     // Stylesheets and scripts live under src/ and are copied verbatim; the
     // leading "src/" is stripped on output, so these land at /css and /js.
@@ -25,6 +27,18 @@ module.exports = function (eleventyConfig) {
     // replace these with a broader copy rule that would sweep it in.
     eleventyConfig.addPassthroughCopy({ "generated/img": "img" });
 
+    // Brand assets built by scripts/generate-icons.mjs from src/icon.svg and
+    // originals/0.jpg: favicon.ico, apple-touch-icon.png and the 1200x630
+    // og-image.jpg. They land at the site root because that is where the
+    // metadata points and, for favicon.ico, where browsers ask for it without
+    // being told. Generated, never committed — same rule as generated/img.
+    eleventyConfig.addPassthroughCopy({ "generated/site": "." });
+
+    // The icon source itself ships as the SVG favicon. Copied rather than
+    // regenerated so there is exactly one file to edit when the mark changes:
+    // this passthrough and the two rasters in generated/site all derive from it.
+    eleventyConfig.addPassthroughCopy({ "src/icon.svg": "favicon.svg" });
+
     // src/_data/gallery.js reads images.json itself rather than letting Eleventy
     // load it, so Eleventy does not know it is a dependency. Without this, an
     // alt-text edit under `--serve` would not rebuild anything.
@@ -51,6 +65,18 @@ module.exports = function (eleventyConfig) {
     // DNS is delegated to Cloudflare, DNS-only (grey cloud) on every record.
     // The proxy is off on purpose: proxying breaks Pages' Let's Encrypt
     // issuance/renewal. Do not turn it on to "fix" anything here.
+
+    // The SEO drift guard. Reads the finished _site/ back off disk and throws if
+    // the route registry, the rendered canonicals, the sitemap and the redirect
+    // stubs disagree — which fails `npm run build` and the PR CI job with it.
+    //
+    // It runs here, after the build, rather than as a separate npm script for
+    // one reason: a check that has to be remembered is a check that eventually
+    // is not run. Wiring it to the build makes it impossible to ship output it
+    // has not seen. See scripts/assert-seo.js for what it actually compares.
+    eleventyConfig.on("eleventy.after", async ({ dir }) => {
+        await assertSeo(dir.output);
+    });
 
     return {
         dir: {

@@ -7,6 +7,13 @@ package-lock.json
 .claude-surf-meta.json
 .claude-surf-status.json
 
+# Prettier formats *.njk with its HTML parser (see .prettierrc.json), which
+# collapses plain text onto a single line. robots.txt is line-oriented and a
+# one-line robots.txt is not a valid robots.txt, so this one template opts out.
+# Every other .njk is real markup and is checked normally — including
+# src/sitemap.njk, whose XML the HTML printer leaves alone.
+src/robots.njk
+
 # Agent instruction file, edited by humans and tooling as prose rather than
 # maintained as source. Prettier's only complaint is emphasis markers
 # (*slim* -> _slim_), which is churn for zero benefit and a needless merge
