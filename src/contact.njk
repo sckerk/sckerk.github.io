@@ -2,10 +2,24 @@
 layout: layouts/base.njk
 permalink: /contact.html
 key: contact
+scripts: ["/js/contact.js"]
 ---
 
 <div class="page contact">
     <h1>Contact</h1>
-    <a href="mailto:sckerk@gmail.com">Email: sckerk@gmail.com</a>
+
+    {# YEO-141: the address is not in this markup as text and not in a mailto:, because it used to
+    be both and that is a free lunch for a harvester. The local part and the domain are held apart
+    in separate attributes, and js/contact.js joins them into an href on the visitor's first hover,
+    focus or tap. The anchor carries no href on purpose - with JS off it is inert text rather than a
+    link that goes nowhere - which is why the noscript below still has to carry the address in a
+    form a human can read and retype. #}
+    <a id="email-link" class="email-link" data-local="sckerk" data-domain="gmail.com">Email</a>
+    <noscript>
+        <span class="email-fallback">Email: sckerk [at] gmail [dot] com</span>
+    </noscript>
+
+    {# No target="_blank" here, so no rel="noopener" is needed. Noted because its absence reads like
+    an oversight otherwise. #}
     <a href="https://www.facebook.com/kerksiewchu/">Facebook: @kerksiewchu</a>
 </div>

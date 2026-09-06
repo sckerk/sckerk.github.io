@@ -128,9 +128,29 @@ Why it matters once it lands:
   settings, not source. Adding a `CNAME` file creates a second source of
   truth that can silently override the setting.
 - Analytics is **Cloudflare Web Analytics**, not Plausible (Plausible has
-  no usable free tier). Not implemented yet — lands in YEO-141. Because
-  the zone is DNS-only, Cloudflare will not auto-inject the beacon; the
-  snippet has to be placed in page source or nothing is collected.
+  no usable free tier). YEO-141 landed the beacon in
+  `src/_includes/layouts/base.njk`. Because the zone is DNS-only,
+  Cloudflare will **not** auto-inject it; that one tag is the only reason
+  anything is collected, so deleting it silently ends measurement. It is
+  `type="module"` (already deferred — do not add `defer`) and carries no
+  `integrity`, because Cloudflare revises `beacon.min.js` in place at a
+  stable URL and publishes no hash. It is cookieless, which is why there
+  is **no consent banner and should not be one**.
+- **Security posture, after YEO-141.** The CSP lives in a
+  `<meta http-equiv>` in the base layout, because Pages cannot set
+  response headers. `frame-ancestors` and `report-uri` are **ignored in
+  meta form**, so there is no clickjacking protection and no violation
+  report channel — the comment beside the tag says so, and that gap
+  should not be quietly recorded as covered. `style-src` is `'self'` with
+  no `'unsafe-inline'`, which only holds while **zero inline `style=`
+  attributes** exist in the built output; if one appears, fix the style
+  rather than loosening the policy. Orbitron and Oswald are self-hosted
+  WOFF2 under `src/fonts/` (see its `README.md`), so the only remaining
+  third-party origins anywhere on the site are the two Cloudflare
+  analytics hosts — `static.cloudflareinsights.com` serves the beacon and
+  `cloudflareinsights.com` receives its POSTs, and both are needed.
+  `contact.njk` publishes no address and no `mailto:`; `src/js/contact.js`
+  assembles the href from split data attributes on first interaction.
 - `package.json` `engines` (`^22.13.0 || ^24.0.0`) is deliberately wider
   than `.nvmrc` (`24.13.0`), so both CI's Node 24 and the maintainer's
   local Node 22 satisfy it. Don't "fix" this into a single pin.

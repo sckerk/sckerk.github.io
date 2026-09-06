@@ -517,10 +517,21 @@ header nav a {
     text-align: center;
 }
 
-.contact a {
+.contact a,
+.contact .email-fallback {
     display: block;
     color: black;
     padding: 50px;
+}
+
+/* The email link ships with no href (js/contact.js adds one on first hover,
+   focus or tap - see YEO-141), and an <a> without an href gets neither the
+   pointer cursor nor the underline the browser gives a real link. Both are
+   restored here so it looks and behaves like the Facebook link beside it from
+   the first frame, before any interaction has happened. */
+.contact .email-link {
+    cursor: pointer;
+    text-decoration: underline;
 }
 
 .events {
