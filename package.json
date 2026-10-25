@@ -15,8 +15,8 @@
         "serve": "node scripts/serve-site.mjs _site 8080"
     },
     "devDependencies": {
-        "@11ty/eleventy": "3.1.6",
-        "html-validate": "11.16.2",
+        "@11ty/eleventy": "3.1.7",
+        "html-validate": "11.16.4",
         "prettier": "3.9.10",
         "sharp": "0.35.5"
     }
