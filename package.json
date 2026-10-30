@@ -16,7 +16,7 @@
     },
     "devDependencies": {
         "@11ty/eleventy": "3.1.7",
-        "html-validate": "11.16.4",
+        "html-validate": "11.17.0",
         "prettier": "3.9.10",
         "sharp": "0.35.5"
     }
